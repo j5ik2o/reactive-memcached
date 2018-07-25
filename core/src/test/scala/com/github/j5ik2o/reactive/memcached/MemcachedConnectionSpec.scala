@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import cats.data.NonEmptyList
-import com.github.j5ik2o.reactive.memcached.command.{ GetRequest, GetSucceeded, SetRequest }
+import com.github.j5ik2o.reactive.memcached.command._
 import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.duration._
@@ -25,15 +25,21 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
     connection.shutdown()
     super.afterAll()
   }
+
   "MemcachedConnectionSpec" - {
     "set & get" in {
-      val key   = UUID.randomUUID().toString
+      val key1  = UUID.randomUUID().toString
+      val key2  = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
       val result = (for {
-        _ <- connection.send(SetRequest(UUID.randomUUID(), key, 0, 10 seconds, value))
-        r <- connection.send(GetRequest(UUID.randomUUID(), NonEmptyList.of(key)))
-      } yield r).runAsync.futureValue
-      result.asInstanceOf[GetSucceeded].value.get.value shouldBe value
+        _  <- connection.send(SetRequest(UUID.randomUUID(), key1, 0, 10 seconds, value))
+        _  <- connection.send(SetRequest(UUID.randomUUID(), key2, 0, 10 seconds, value))
+        gr <- connection.send(GetRequest(UUID.randomUUID(), NonEmptyList.of(key1, key2)))
+        dr <- connection.send(DeleteRequest(UUID.randomUUID(), key1))
+      } yield (gr, dr)).runAsync.futureValue
+      result._1.asInstanceOf[GetSucceeded].value.get(0).value shouldBe value
+      result._1.asInstanceOf[GetSucceeded].value.get(1).value shouldBe value
+      result._2.isInstanceOf[DeleteSucceeded] shouldBe true
     }
   }
 

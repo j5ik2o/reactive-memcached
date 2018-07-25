@@ -2,6 +2,7 @@ package com.github.j5ik2o.reactive.memcached.parser
 
 import com.github.j5ik2o.reactive.memcached.parser.model._
 import fastparse.all._
+import fastparse.core
 
 object StringParsers {
 
@@ -31,12 +32,13 @@ object StringParsers {
   val storageCommandResponse: P[Expr] = P((stored | notStored | exists | notFound) | allErrors)
 
   val value: P[ValueExpr] =
-    P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ expireTime ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf ~ end).map {
-      case (key, flags, expireTime, value, _) =>
+    P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ expireTime ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf).map {
+      case (key, flags, expireTime, value) =>
         ValueExpr(key, flags, expireTime, value)
     }
+  val values: P[ValuesExpr] = P(value.rep(1) ~ end).map { case (v, _) => ValuesExpr(v) }
 
-  val retrievalCommandResponse: P[Expr] = P(end | value | allErrors)
+  val retrievalCommandResponse: P[Expr] = P(end | values | allErrors)
 
   val deletionCommandResponse: P[Expr] = P(deleted | notFound | allErrors)
 

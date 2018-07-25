@@ -20,8 +20,11 @@ final case class GetRequest(id: UUID, keys: NonEmptyList[String]) extends Comman
   override protected def parseResponse: Handler = {
     case (EndExpr, next) =>
       (GetSucceeded(UUID.randomUUID(), id, None), next)
-    case (ValueExpr(key, flags, expireTime, value), next) =>
-      (GetSucceeded(UUID.randomUUID(), id, Some(ValueDesc(key, flags, expireTime, value))), next)
+    case (ValuesExpr(values), next) =>
+      (GetSucceeded(UUID.randomUUID(),
+                    id,
+                    Some(values.map(ve => ValueDesc(ve.key, ve.flags, ve.expireTime, ve.value)))),
+       next)
     case (ErrorExpr, next) =>
       (GetFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.OtherType, None)), next)
     case (ClientErrorExpr(msg), next) =>
@@ -34,6 +37,6 @@ final case class GetRequest(id: UUID, keys: NonEmptyList[String]) extends Comman
 
 final case class ValueDesc(key: String, flags: Int, expire: Long, value: String)
 
-sealed trait GetResponse                                                           extends CommandResponse
-final case class GetSucceeded(id: UUID, requestId: UUID, value: Option[ValueDesc]) extends GetResponse
-final case class GetFailed(id: UUID, requestId: UUID, ex: MemcachedIOException)    extends GetResponse
+sealed trait GetResponse                                                                extends CommandResponse
+final case class GetSucceeded(id: UUID, requestId: UUID, value: Option[Seq[ValueDesc]]) extends GetResponse
+final case class GetFailed(id: UUID, requestId: UUID, ex: MemcachedIOException)         extends GetResponse
