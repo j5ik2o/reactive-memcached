@@ -1,6 +1,6 @@
 # reactive-mecached
 
-[![CircleCI](https://circleci.com/gh/j5ik2o/reactive-memached/tree/master.svg?style=svg)](https://circleci.com/gh/j5ik2o/reactive-redis/tree/master)
+[![CircleCI](https://circleci.com/gh/j5ik2o/reactive-memached/tree/master.svg?style=svg)](https://circleci.com/gh/j5ik2o/reactive-memached/tree/master)
 
 Akka-Stream based Memcached Client for Scala
 
