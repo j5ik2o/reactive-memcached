@@ -9,7 +9,7 @@ import fastparse.all._
 
 import scala.concurrent.duration.FiniteDuration
 
-case class SetRequest(id: UUID, key: String, flags: Int, expireDuration: FiniteDuration, value: String)
+final case class SetRequest(id: UUID, key: String, flags: Int, expireDuration: FiniteDuration, value: String)
     extends CommandRequest
     with StringParsersSupport {
 
@@ -33,6 +33,6 @@ case class SetRequest(id: UUID, key: String, flags: Int, expireDuration: FiniteD
 
 }
 
-sealed trait SetResponse                                                  extends CommandResponse
-case class SetSucceeded(id: UUID, requestId: UUID)                        extends SetResponse
-case class SetFailed(id: UUID, requestId: UUID, ex: MemcachedIOException) extends SetResponse
+sealed trait SetResponse                                                        extends CommandResponse
+final case class SetSucceeded(id: UUID, requestId: UUID)                        extends SetResponse
+final case class SetFailed(id: UUID, requestId: UUID, ex: MemcachedIOException) extends SetResponse

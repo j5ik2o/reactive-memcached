@@ -24,16 +24,18 @@ object StringParsers {
   val exists: P[ExistsExpr.type]       = P("EXISTS" ~ crlf).map(_ => ExistsExpr)
   val notFound: P[NotFoundExpr.type]   = P("NOT_FOUND" ~ crlf).map(_ => NotFoundExpr)
 
-  val key: P[String]      = alphaDigit.rep(1).!
+  val key: P[String]      = (!" " ~/ AnyChar).rep(1).!
   val flags: P[Int]       = digit.rep(1).!.map(_.toInt)
   val expireTime: P[Long] = digit.rep(1).!.map(_.toLong)
 
   val storageCommandResponse: P[Expr] = P((stored | notStored | exists | notFound) | allErrors)
 
-  val value = P("VALUE" ~ key ~ flags ~ expireTime ~ crlf ~ (!end ~/ AnyChar).rep.! ~ end).map {
-    case (key, flags, expireTime, value, _) =>
-      ValueExpr(key, flags, expireTime, value)
-  }
+  val value: P[ValueExpr] =
+    P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ expireTime ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf ~ end).map {
+      case (key, flags, expireTime, value, _) =>
+        ValueExpr(key, flags, expireTime, value)
+    }
+
   val retrievalCommandResponse: P[Expr] = P(end | value | allErrors)
 
   val deletionCommandResponse: P[Expr] = P(deleted | notFound | allErrors)
