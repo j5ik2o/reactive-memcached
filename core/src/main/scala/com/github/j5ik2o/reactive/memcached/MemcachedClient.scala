@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import cats.Show
+import cats.implicits._
 import cats.data.{ NonEmptyList, ReaderT }
 import com.github.j5ik2o.reactive.memcached.command._
 
@@ -25,11 +26,11 @@ final case class MemcachedClient(implicit system: ActorSystem) {
       case SetFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
-  def add(key: String,
-          value: String,
-          expire: Duration = Duration.Inf,
-          flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(AddRequest(UUID.randomUUID(), key, flags, expire, value)).flatMap {
+  def add[A: Show](key: String,
+                   value: String,
+                   expire: Duration = Duration.Inf,
+                   flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
+    send(AddRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
       case AddExisted(_, _)    => ReaderTTask.pure(0)
       case AddNotFounded(_, _) => ReaderTTask.pure(0)
       case AddNotStored(_, _)  => ReaderTTask.pure(0)
@@ -37,11 +38,11 @@ final case class MemcachedClient(implicit system: ActorSystem) {
       case AddFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
-  def append(key: String,
-             value: String,
-             expire: Duration = Duration.Inf,
-             flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(AppendRequest(UUID.randomUUID(), key, flags, expire, value)).flatMap {
+  def append[A: Show](key: String,
+                      value: A,
+                      expire: Duration = Duration.Inf,
+                      flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
+    send(AppendRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
       case AppendExisted(_, _)    => ReaderTTask.pure(0)
       case AppendNotFounded(_, _) => ReaderTTask.pure(0)
       case AppendNotStored(_, _)  => ReaderTTask.pure(0)
@@ -49,11 +50,11 @@ final case class MemcachedClient(implicit system: ActorSystem) {
       case AppendFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
-  def prepend(key: String,
-              value: String,
-              expire: Duration = Duration.Inf,
-              flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(PrependRequest(UUID.randomUUID(), key, flags, expire, value)).flatMap {
+  def prepend[A: Show](key: String,
+                       value: A,
+                       expire: Duration = Duration.Inf,
+                       flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
+    send(PrependRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
       case PrependExisted(_, _)    => ReaderTTask.pure(0)
       case PrependNotFounded(_, _) => ReaderTTask.pure(0)
       case PrependNotStored(_, _)  => ReaderTTask.pure(0)
@@ -61,11 +62,11 @@ final case class MemcachedClient(implicit system: ActorSystem) {
       case PrependFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
-  def replace(key: String,
-              value: String,
-              expire: Duration = Duration.Inf,
-              flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(ReplaceRequest(UUID.randomUUID(), key, flags, expire, value)).flatMap {
+  def replace[A: Show](key: String,
+                       value: A,
+                       expire: Duration = Duration.Inf,
+                       flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
+    send(ReplaceRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
       case ReplaceExisted(_, _)    => ReaderTTask.pure(0)
       case ReplaceNotFounded(_, _) => ReaderTTask.pure(0)
       case ReplaceNotStored(_, _)  => ReaderTTask.pure(0)
@@ -88,7 +89,7 @@ final case class MemcachedClient(implicit system: ActorSystem) {
     }
 
   def get(key: String): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
-    get(NonEmptyList.of(key)).map { _.flatMap(_.headOption) }
+    get(NonEmptyList.of(key)).map(_.flatMap(_.headOption))
 
   def get(keys: NonEmptyList[String]): ReaderTTaskMemcachedConnection[Option[Seq[ValueDesc]]] =
     send(GetRequest(UUID.randomUUID(), keys)).flatMap {
