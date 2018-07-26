@@ -40,7 +40,7 @@ class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConn
     )
     connectionPools.append(p1, p2)
 
-    hashRingConnection = new HashRingConnection(connectionPools.result, 1)
+    hashRingConnection = HashRingConnection(connectionPools.result)
   }
 
   override protected def afterAll(): Unit = {
