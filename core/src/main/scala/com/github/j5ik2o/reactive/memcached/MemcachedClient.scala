@@ -72,6 +72,20 @@ class MemcachedClient(implicit system: ActorSystem) {
       case ReplaceFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
+  def increment(key: String, value: Long): ReaderTTaskMemcachedConnection[Option[Long]] =
+    send(IncrementRequest(UUID.randomUUID(), key, value)).flatMap {
+      case IncrementNotFound(_, _)          => ReaderTTask.pure(None)
+      case IncrementSucceeded(_, _, result) => ReaderTTask.pure(Some(result))
+      case IncrementFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
+    }
+
+  def decrement(key: String, value: Long): ReaderTTaskMemcachedConnection[Option[Long]] =
+    send(DecrementRequest(UUID.randomUUID(), key, value)).flatMap {
+      case DecrementNotFound(_, _)          => ReaderTTask.pure(None)
+      case DecrementSucceeded(_, _, result) => ReaderTTask.pure(Some(result))
+      case DecrementFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
+    }
+
   def get(keys: NonEmptyList[String]): ReaderTTaskMemcachedConnection[Option[Seq[ValueDesc]]] =
     send(GetRequest(UUID.randomUUID(), keys)).flatMap {
       case GetSucceeded(_, _, result) => ReaderTTask.pure(result)

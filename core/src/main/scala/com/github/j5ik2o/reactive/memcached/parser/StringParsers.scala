@@ -29,7 +29,8 @@ object StringParsers {
   val flags: P[Int]       = digit.rep(1).!.map(_.toInt)
   val expireTime: P[Long] = digit.rep(1).!.map(_.toLong)
 
-  val storageCommandResponse: P[Expr] = P((stored | notStored | exists | notFound) | allErrors)
+  val incOrDecCommandResponse: P[Expr] = P(notFound | ((!crlf ~/ AnyChar).rep.! ~ crlf).map(StringExpr) | allErrors)
+  val storageCommandResponse: P[Expr]  = P((stored | notStored | exists | notFound) | allErrors)
 
   val value: P[ValueExpr] =
     P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ expireTime ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf).map {

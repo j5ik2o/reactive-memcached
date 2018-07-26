@@ -10,6 +10,10 @@ Akka-Stream based Memcached Client for Scala
 - Transport is akka-stream 2.5.x.
 - Response parser is fastparse.
 
+## Support Protocol
+
+https://github.com/memcached/memcached/blob/master/doc/protocol.txt
+
 ## Installation
 
 Add the following to your sbt build (Scala 2.11.x, 2.12.x):
