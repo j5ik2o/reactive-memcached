@@ -39,16 +39,83 @@ libraryDependencies += "com.github.j5ik2o" %% "reactive-memached-core" % "1.0.0-
 ### Non connection pooling
 
 ```scala
+import monix.execution.Scheduler.Implicits.global
+
+implicit val system = ActorSystem()
+
+val peerConfig = PeerConfig(remoteAddress = new InetSocketAddress("127.0.0.1", 6379))
+val connection = MemcachedConnection(peerConfig)
+val client = MemcachedClient()
+
+val result = (for{
+  _ <- client.set("foo", "bar")
+  r <- client.get("foo")
+} yield r).run(connection).runAsync
+
+println(result) // bar
 ```
 
 ### Connection pooling
 
 ```scala
+import monix.execution.Scheduler.Implicits.global
+
+implicit val system = ActorSystem()
+
+val peerConfig = PeerConfig(remoteAddress = new InetSocketAddress("127.0.0.1", 6379))
+val pool = MemcachedConnectionPool.ofSingleRoundRobin(sizePerPeer = 5, peerConfig, RedisConnection(_)) // powered by RoundRobinPool
+val connection = MemcachedConnection(connectionConfig)
+val client = MemcachedClient()
+
+// Fucntion style
+val result1 = pool.withConnectionF{ con =>
+  (for{
+    _ <- client.set("foo", "bar")
+    r <- client.get("foo")
+  } yield r).run(con) 
+}.runAsync
+
+println(result1) // bar
+
+// Monadic style
+val result2 = (for {
+  _ <- ConnectionAutoClose(pool)(client.set("foo", "bar").run)
+  r <- ConnectionAutoClose(pool)(client.get("foo").run)
+} yield r).run().runAsync
+
+println(result2) // bar
 ```
 
-### Master & Slaves aggregate connection
+if you want to use other pooling implementation, please select from the following modules.
+
+- reactive-memcached-pool-commons (commons-pool2)
+- reactive-memcached-pool-scala (scala-pool)
+- reactive-memcached-pool-fop (fast-object-pool)
+- reactive-memcached-pool-stormpot (stormpot)
+
+### Hash ring connection
 
 ```scala
+import monix.execution.Scheduler.Implicits.global
+
+implicit val system = ActorSystem()
+
+val peerConfigs = Seq(
+  PeerConfig(remoteAddress = new InetSocketAddress("127.0.0.1", 6380)),
+  PeerConfig(remoteAddress = new InetSocketAddress("127.0.0.1", 6381)),
+  PeerConfig(remoteAddress = new InetSocketAddress("127.0.0.1", 6382))
+)
+
+val connection = HashRingConnection(peerConfigs)
+
+val client = MemcachedClient()
+
+val result = (for{
+  _ <- client.set("foo", "bar") // write to master
+  r <- client.get("foo")        // read from any slave
+} yield r).run(connection).runAsync
+
+println(result) // bar
 ```
 
 ## License
