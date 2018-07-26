@@ -8,7 +8,9 @@ import com.github.j5ik2o.reactive.memcached.parser.model._
 import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 import fastparse.all._
 
-final case class GetRequest(id: UUID, keys: NonEmptyList[String]) extends CommandRequest with StringParsersSupport {
+final class GetRequest private (val id: UUID, val keys: NonEmptyList[String])
+    extends CommandRequest
+    with StringParsersSupport {
 
   override type Response = GetResponse
   override val isMasterOnly: Boolean = false
@@ -32,6 +34,14 @@ final case class GetRequest(id: UUID, keys: NonEmptyList[String]) extends Comman
     case (ServerErrorExpr(msg), next) =>
       (GetFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.ServerType, Some(msg))), next)
   }
+
+}
+
+object GetRequest {
+
+  def apply(id: UUID, keys: NonEmptyList[String]): GetRequest = new GetRequest(id, keys)
+
+  def apply(id: UUID, key: String): GetRequest = new GetRequest(id, NonEmptyList.of(key))
 
 }
 

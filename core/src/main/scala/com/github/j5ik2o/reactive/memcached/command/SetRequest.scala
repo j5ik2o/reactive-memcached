@@ -2,17 +2,18 @@ package com.github.j5ik2o.reactive.memcached.command
 
 import java.util.UUID
 
+import cats.Show
 import com.github.j5ik2o.reactive.memcached.parser.model._
 import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 
 import scala.concurrent.duration.Duration
 
-final case class SetRequest(id: UUID,
-                            key: String,
-                            flags: Int,
-                            expireDuration: Duration,
-                            value: String,
-                            noReply: Boolean = false)
+final class SetRequest private (val id: UUID,
+                                val key: String,
+                                val value: String,
+                                val expireDuration: Duration,
+                                val flags: Int,
+                                val noReply: Boolean = false)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
   override val commandName = "set"
@@ -35,6 +36,17 @@ final case class SetRequest(id: UUID,
       (SetFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.ServerType, Some(msg))), next)
   }
 
+}
+
+object SetRequest {
+
+  def apply[A](id: UUID,
+               key: String,
+               value: A,
+               expireDuration: Duration = Duration.Inf,
+               flags: Int = 0,
+               noReply: Boolean = false)(implicit s: Show[A]): SetRequest =
+    new SetRequest(id, key, s.show(value), expireDuration, flags, noReply)
 }
 
 sealed trait SetResponse                                                        extends CommandResponse

@@ -3,20 +3,21 @@ package com.github.j5ik2o.reactive.memcached
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import cats.Show
 import cats.data.{ NonEmptyList, ReaderT }
 import com.github.j5ik2o.reactive.memcached.command._
 
 import scala.concurrent.duration.Duration
 
-class MemcachedClient(implicit system: ActorSystem) {
+final case class MemcachedClient(implicit system: ActorSystem) {
 
   def send[C <: CommandRequestBase](cmd: C): ReaderTTaskMemcachedConnection[cmd.Response] = ReaderT(_.send(cmd))
 
-  def set(key: String,
-          value: String,
-          expire: Duration = Duration.Inf,
-          flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(SetRequest(UUID.randomUUID(), key, flags, expire, value)).flatMap {
+  def set[A: Show](key: String,
+                   value: A,
+                   expire: Duration = Duration.Inf,
+                   flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
+    send(SetRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
       case SetExisted(_, _)    => ReaderTTask.pure(0)
       case SetNotFounded(_, _) => ReaderTTask.pure(0)
       case SetNotStored(_, _)  => ReaderTTask.pure(0)
@@ -85,6 +86,9 @@ class MemcachedClient(implicit system: ActorSystem) {
       case DecrementSucceeded(_, _, result) => ReaderTTask.pure(Some(result))
       case DecrementFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
     }
+
+  def get(key: String): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
+    get(NonEmptyList.of(key)).map { _.flatMap(_.headOption) }
 
   def get(keys: NonEmptyList[String]): ReaderTTaskMemcachedConnection[Option[Seq[ValueDesc]]] =
     send(GetRequest(UUID.randomUUID(), keys)).flatMap {
