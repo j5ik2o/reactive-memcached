@@ -1,4 +1,4 @@
-# [WIP] reactive-mecached
+# reactive-mecached
 
 [![CircleCI](https://circleci.com/gh/j5ik2o/reactive-memcached/tree/master.svg?style=svg)](https://circleci.com/gh/j5ik2o/reactive-memcached/tree/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0f8d5414b1da449d85299daa9934c899)](https://www.codacy.com/app/j5ik2o/reactive-memached?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=j5ik2o/reactive-memached&amp;utm_campaign=Badge_Grade)
