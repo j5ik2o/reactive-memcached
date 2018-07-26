@@ -36,7 +36,7 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
     printlnStreamFuture(new BufferedReader(new InputStreamReader(p.getErrorStream)))
     p.waitFor()
     val exitValue = p.exitValue()
-    require(exitValue == 0 || exitValue == 1, "redis-server binary must be present.")
+    require(exitValue == 0 || exitValue == 1, "memcached binary must be present.")
   }
 
   private[this] def findAddress(): InetSocketAddress = {

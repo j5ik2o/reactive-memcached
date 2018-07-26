@@ -3,7 +3,6 @@ package com.github.j5ik2o.reactive.memcached
 import org.scalatest.{ BeforeAndAfterAll, Suite }
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MemcachedSpecSupport extends RandomPortSupport with Suite with BeforeAndAfterAll {
 
@@ -20,6 +19,7 @@ trait MemcachedSpecSupport extends RandomPortSupport with Suite with BeforeAndAf
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
+    import scala.concurrent.ExecutionContext.Implicits.global
     startMemcached()
   }
 
