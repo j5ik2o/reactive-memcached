@@ -6,15 +6,17 @@ import scala.concurrent.ExecutionContext
 
 trait MemcachedSpecSupport extends RandomPortSupport with Suite with BeforeAndAfterAll {
 
-  var testServer: MemcachedTestServer = _
+  private var _memcachedTestServer: MemcachedTestServer = _
+
+  def memcachedTestServer: MemcachedTestServer = _memcachedTestServer
 
   def startMemcached()(implicit ec: ExecutionContext): Unit = {
-    testServer = new MemcachedTestServer()
-    testServer.start()
+    _memcachedTestServer = new MemcachedTestServer()
+    _memcachedTestServer.start()
   }
 
   def stopMemached(): Unit = {
-    testServer.stop()
+    _memcachedTestServer.stop()
   }
 
   override protected def beforeAll(): Unit = {

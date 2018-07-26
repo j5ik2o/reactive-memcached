@@ -8,12 +8,12 @@ import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 
 import scala.concurrent.duration.Duration
 
-final case class ReplaceRequest(id: UUID,
-                                key: String,
-                                value: String,
-                                expireDuration: Duration,
-                                flags: Int,
-                                noReply: Boolean)
+final case class ReplaceRequest(override val id: UUID,
+                                override val key: String,
+                                override val value: String,
+                                override val expireDuration: Duration,
+                                override val flags: Int,
+                                override val noReply: Boolean)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
   override protected val commandName: String = "replace"

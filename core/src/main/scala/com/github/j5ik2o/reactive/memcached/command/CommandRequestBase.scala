@@ -15,7 +15,7 @@ trait CommandRequestBase {
   type Handler = PartialFunction[(Expr, Int), (Response, Int)]
 
   val id: UUID
-
+  val key: String
   val isMasterOnly: Boolean
 
   def asString: String

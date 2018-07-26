@@ -89,10 +89,7 @@ final case class MemcachedClient(implicit system: ActorSystem) {
     }
 
   def get(key: String): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
-    get(NonEmptyList.of(key)).map(_.flatMap(_.headOption))
-
-  def get(keys: NonEmptyList[String]): ReaderTTaskMemcachedConnection[Option[Seq[ValueDesc]]] =
-    send(GetRequest(UUID.randomUUID(), keys)).flatMap {
+    send(GetRequest(UUID.randomUUID(), key)).flatMap {
       case GetSucceeded(_, _, result) => ReaderTTask.pure(result)
       case GetFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
     }

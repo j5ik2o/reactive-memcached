@@ -30,7 +30,8 @@ import scala.concurrent.{ Future, Promise }
 object MemcachedConnection {
 
   implicit val logSource: LogSource[MemcachedConnection] = new LogSource[MemcachedConnection] {
-    override def genString(o: MemcachedConnection): String  = s"connection:${o.id}"
+    override def genString(o: MemcachedConnection): String =
+      s"connection:${o.id}:${o.peerConfig.map(_.remoteAddress.toString).getOrElse("")}"
     override def getClazz(o: MemcachedConnection): Class[_] = o.getClass
   }
 
@@ -47,9 +48,8 @@ object MemcachedConnection {
 
 trait MemcachedConnection {
   def id: UUID
-  def peerConfig: PeerConfig
   def shutdown(): Unit
-
+  def peerConfig: Option[PeerConfig]
   def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response]
 
   def toFlow[C <: CommandRequestBase](
@@ -60,15 +60,16 @@ trait MemcachedConnection {
     }
 }
 
-private[memcached] class MemcachedConnectionImpl(val peerConfig: PeerConfig,
+private[memcached] class MemcachedConnectionImpl(_peerConfig: PeerConfig,
                                                  supervisionDecider: Option[Supervision.Decider])(
     implicit system: ActorSystem
 ) extends MemcachedConnection {
 
   override def id: UUID = UUID.randomUUID()
 
-  import peerConfig._
-  import peerConfig.backoffConfig._
+  val peerConfig = Some(_peerConfig)
+  import _peerConfig._
+  import _peerConfig.backoffConfig._
 
   private val log: LoggingAdapter = Logging(system, this)
 

@@ -153,7 +153,8 @@ object MemcachedConnectionPool {
   private class SinglePool(memcachedConnection: MemcachedConnection)(implicit system: ActorSystem)
       extends MemcachedConnectionPool[Task]() {
 
-    override def peerConfigs: NonEmptyList[PeerConfig] = NonEmptyList.of(memcachedConnection.peerConfig)
+    override def peerConfigs: NonEmptyList[PeerConfig] =
+      memcachedConnection.peerConfig.map(v => NonEmptyList.of(v)).getOrElse(throw new NoSuchElementException)
 
     override def withConnectionM[T](reader: ReaderMemcachedConnection[Task, T]): Task[T] = reader(memcachedConnection)
 
