@@ -38,6 +38,4 @@ abstract class AbstractActorSpec(_system: ActorSystem)
     super.afterAll()
   }
 
-  // protected def createConnectionPool(peerConfigs: NonEmptyList[PeerConfig]): RedisConnectionPoohl[Task]
-
 }

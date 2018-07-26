@@ -30,7 +30,7 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
     })
     .getPath
 
-  private[this] def assertRedisBinaryPresent()(implicit ec: ExecutionContext): Unit = {
+  private[this] def assertMemcachedBinaryPresent()(implicit ec: ExecutionContext): Unit = {
     val p = new ProcessBuilder(path, "--help").start()
     printlnStreamFuture(new BufferedReader(new InputStreamReader(p.getInputStream)))
     printlnStreamFuture(new BufferedReader(new InputStreamReader(p.getErrorStream)))
@@ -51,7 +51,7 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
       }
     }
     val result = _address.getOrElse {
-      sys.error("Couldn't get an address for the external redis instance")
+      sys.error("Couldn't get an address for the external memcached instance")
     }
     logger.info(s"findAddress: ${_address}")
     result
@@ -82,7 +82,7 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
   }
 
   def start()(implicit ec: ExecutionContext): Unit = {
-    assertRedisBinaryPresent()
+    assertMemcachedBinaryPresent()
     findAddress()
     logger.info("memcached test server will be started")
     val port             = getPort
