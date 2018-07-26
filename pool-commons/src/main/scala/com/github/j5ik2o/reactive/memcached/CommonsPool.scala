@@ -1,4 +1,5 @@
 package com.github.j5ik2o.reactive.memcached
+
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 
@@ -10,17 +11,17 @@ import com.github.j5ik2o.reactive.memcached.CommonsPool.MemcachedConnectionPoolF
 import com.github.j5ik2o.reactive.memcached.command.CommandRequestBase
 import monix.eval.Task
 import monix.execution.Scheduler
-import org.apache.commons.pool2.{ BasePooledObjectFactory, PooledObject }
 import org.apache.commons.pool2.impl.{ DefaultPooledObject, GenericObjectPool, GenericObjectPoolConfig }
+import org.apache.commons.pool2.{ BasePooledObjectFactory, PooledObject }
 
 import scala.concurrent.duration._
 
-final case class MemcachedConnectionPoolable(index: Int, redisConnection: MemcachedConnection)
+final case class MemcachedConnectionPoolable(index: Int, memcachedConnection: MemcachedConnection)
     extends MemcachedConnection {
-  override def id: UUID                                                  = redisConnection.id
-  override def peerConfig: Option[PeerConfig]                            = redisConnection.peerConfig
-  override def shutdown(): Unit                                          = redisConnection.shutdown()
-  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = redisConnection.send(cmd)
+  override def id: UUID                                                  = memcachedConnection.id
+  override def peerConfig: Option[PeerConfig]                            = memcachedConnection.peerConfig
+  override def shutdown(): Unit                                          = memcachedConnection.shutdown()
+  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = memcachedConnection.send(cmd)
 
 }
 object CommonsPool {

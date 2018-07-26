@@ -6,7 +6,7 @@ import com.github.j5ik2o.reactive.memcached.command.CommandRequestBase
 import com.github.j5ik2o.reactive.memcached.util.HashRing
 import monix.eval.Task
 
-final class HashRingConnection(connectionPools: Seq[MemcachedConnectionPool[Task]], replicas: Int = 2)
+final case class HashRingConnection(connectionPools: Seq[MemcachedConnectionPool[Task]], replicas: Int = 2)
     extends MemcachedConnection {
   override def id: UUID = UUID.randomUUID()
 
