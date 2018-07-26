@@ -2,6 +2,7 @@ package com.github.j5ik2o.reactive.memcached.command
 
 import java.util.UUID
 
+import cats.Show
 import com.github.j5ik2o.reactive.memcached.parser.model._
 import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 
@@ -9,10 +10,10 @@ import scala.concurrent.duration.Duration
 
 final case class ReplaceRequest(id: UUID,
                                 key: String,
-                                flags: Int,
-                                expireDuration: Duration,
                                 value: String,
-                                noReply: Boolean = false)
+                                expireDuration: Duration,
+                                flags: Int,
+                                noReply: Boolean)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
   override protected val commandName: String = "replace"
@@ -35,6 +36,14 @@ final case class ReplaceRequest(id: UUID,
     case (ServerErrorExpr(msg), next) =>
       (ReplaceFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.ServerType, Some(msg))), next)
   }
+
+}
+
+object ReplaceRequest {
+
+  def apply[A](id: UUID, key: String, value: A, expireDuration: Duration, flags: Int, noReply: Boolean = false)(
+      implicit s: Show[A]
+  ): ReplaceRequest = new ReplaceRequest(id, key, s.show(value), expireDuration, flags, noReply)
 
 }
 

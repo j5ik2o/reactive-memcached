@@ -2,17 +2,18 @@ package com.github.j5ik2o.reactive.memcached.command
 
 import java.util.UUID
 
+import cats.Show
 import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 import com.github.j5ik2o.reactive.memcached.parser.model._
 
 import scala.concurrent.duration.Duration
 
-final case class AppendRequest(id: UUID,
-                               key: String,
-                               flags: Int,
-                               expireDuration: Duration,
-                               value: String,
-                               noReply: Boolean = false)
+final class AppendRequest private (val id: UUID,
+                                   val key: String,
+                                   val value: String,
+                                   val expireDuration: Duration,
+                                   val flags: Int,
+                                   val noReply: Boolean = false)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
   override protected val commandName: String = "append"
@@ -35,6 +36,19 @@ final case class AppendRequest(id: UUID,
     case (ServerErrorExpr(msg), next) =>
       (AppendFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.ServerType, Some(msg))), next)
   }
+
+}
+
+object AppendRequest {
+
+  def apply[A](id: UUID,
+               key: String,
+               value: A,
+               expireDuration: Duration = Duration.Inf,
+               flags: Int = 0,
+               noReply: Boolean = false)(
+      implicit s: Show[A]
+  ): AppendRequest = new AppendRequest(id, key, s.show(value), expireDuration, flags, noReply)
 
 }
 
