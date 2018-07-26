@@ -8,12 +8,12 @@ import com.github.j5ik2o.reactive.memcached.parser.model._
 
 import scala.concurrent.duration.Duration
 
-final case class AddRequest private (id: UUID,
-                                     key: String,
-                                     value: String,
-                                     expireDuration: Duration,
-                                     flags: Int,
-                                     noReply: Boolean)
+final case class AddRequest private (override val id: UUID,
+                                     override val key: String,
+                                     override val value: String,
+                                     override val expireDuration: Duration,
+                                     override val flags: Int,
+                                     override val noReply: Boolean)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
   override protected val commandName: String = "add"
 

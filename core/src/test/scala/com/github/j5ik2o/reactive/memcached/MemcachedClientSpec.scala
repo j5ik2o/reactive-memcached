@@ -16,7 +16,7 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     connection = MemcachedConnection(
-      PeerConfig(new InetSocketAddress("127.0.0.1", testServer.getPort),
+      PeerConfig(new InetSocketAddress("127.0.0.1", memcachedTestServer.getPort),
                  backoffConfig = BackoffConfig(maxRestarts = 1)),
       None
     )

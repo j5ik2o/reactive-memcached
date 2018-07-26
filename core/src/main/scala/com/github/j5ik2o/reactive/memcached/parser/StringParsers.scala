@@ -37,9 +37,9 @@ object StringParsers {
       case (key, flags, expireTime, value) =>
         ValueExpr(key, flags, expireTime, value)
     }
-  val values: P[ValuesExpr] = P(value.rep(1) ~ end).map { case (v, _) => ValuesExpr(v) }
+  //val values: P[ValuesExpr] = P(value.rep(1) ~ end).map { case (v, _) => ValuesExpr(v) }
 
-  val retrievalCommandResponse: P[Expr] = P(end | values | allErrors)
+  val retrievalCommandResponse: P[Expr] = P(end | value | allErrors)
 
   val deletionCommandResponse: P[Expr] = P(deleted | notFound | allErrors)
 

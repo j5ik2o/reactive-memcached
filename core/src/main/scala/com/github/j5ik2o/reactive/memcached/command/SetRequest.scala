@@ -8,12 +8,12 @@ import com.github.j5ik2o.reactive.memcached.{ ErrorType, MemcachedIOException }
 
 import scala.concurrent.duration.Duration
 
-final class SetRequest private (val id: UUID,
-                                val key: String,
-                                val value: String,
-                                val expireDuration: Duration,
-                                val flags: Int,
-                                val noReply: Boolean = false)
+final class SetRequest private (override val id: UUID,
+                                override val key: String,
+                                override val value: String,
+                                override val expireDuration: Duration,
+                                override val flags: Int,
+                                override val noReply: Boolean = false)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
   override val commandName = "set"

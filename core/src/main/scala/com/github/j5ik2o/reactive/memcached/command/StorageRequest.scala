@@ -9,12 +9,12 @@ import fastparse.all._
 
 import scala.concurrent.duration.Duration
 
-abstract class StorageRequest(id: UUID,
-                              key: String,
-                              flags: Int,
-                              expireDuration: Duration,
-                              value: String,
-                              noReply: Boolean = false)
+abstract class StorageRequest(val id: UUID,
+                              val key: String,
+                              val flags: Int,
+                              val expireDuration: Duration,
+                              val value: String,
+                              val noReply: Boolean = false)
     extends CommandRequest
     with StringParsersSupport {
 

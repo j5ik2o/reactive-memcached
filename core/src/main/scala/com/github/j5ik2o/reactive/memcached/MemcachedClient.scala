@@ -4,13 +4,19 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import cats.Show
+import cats.data.ReaderT
 import cats.implicits._
-import cats.data.{ NonEmptyList, ReaderT }
 import com.github.j5ik2o.reactive.memcached.command._
 
 import scala.concurrent.duration.Duration
 
-final case class MemcachedClient(implicit system: ActorSystem) {
+object MemcachedClient {
+
+  def apply()(implicit system: ActorSystem): MemcachedClient = new MemcachedClient()
+
+}
+
+final class MemcachedClient()(implicit system: ActorSystem) {
 
   def send[C <: CommandRequestBase](cmd: C): ReaderTTaskMemcachedConnection[cmd.Response] = ReaderT(_.send(cmd))
 
@@ -89,10 +95,7 @@ final case class MemcachedClient(implicit system: ActorSystem) {
     }
 
   def get(key: String): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
-    get(NonEmptyList.of(key)).map(_.flatMap(_.headOption))
-
-  def get(keys: NonEmptyList[String]): ReaderTTaskMemcachedConnection[Option[Seq[ValueDesc]]] =
-    send(GetRequest(UUID.randomUUID(), keys)).flatMap {
+    send(GetRequest(UUID.randomUUID(), key)).flatMap {
       case GetSucceeded(_, _, result) => ReaderTTask.pure(result)
       case GetFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
     }

@@ -17,7 +17,7 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     connection = MemcachedConnection(
-      PeerConfig(new InetSocketAddress("127.0.0.1", testServer.getPort),
+      PeerConfig(new InetSocketAddress("127.0.0.1", memcachedTestServer.getPort),
                  backoffConfig = BackoffConfig(maxRestarts = 1)),
       None
     )
@@ -35,14 +35,15 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
       val key2  = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
       val result = (for {
-        _  <- connection.send(SetRequest(UUID.randomUUID(), key1, value, 10 seconds))
-        _  <- connection.send(SetRequest(UUID.randomUUID(), key2, value, 10 seconds))
-        gr <- connection.send(GetRequest(UUID.randomUUID(), NonEmptyList.of(key1, key2)))
-        dr <- connection.send(DeleteRequest(UUID.randomUUID(), key1))
-      } yield (gr, dr)).runAsync.futureValue
-      result._1.asInstanceOf[GetSucceeded].value.get(0).value shouldBe value
-      result._1.asInstanceOf[GetSucceeded].value.get(1).value shouldBe value
-      result._2.isInstanceOf[DeleteSucceeded] shouldBe true
+        _   <- connection.send(SetRequest(UUID.randomUUID(), key1, value, 10 seconds))
+        _   <- connection.send(SetRequest(UUID.randomUUID(), key2, value, 10 seconds))
+        gr1 <- connection.send(GetRequest(UUID.randomUUID(), key1))
+        gr2 <- connection.send(GetRequest(UUID.randomUUID(), key2))
+        dr  <- connection.send(DeleteRequest(UUID.randomUUID(), key1))
+      } yield (gr1, gr2, dr)).runAsync.futureValue
+      result._1.asInstanceOf[GetSucceeded].value.get.value shouldBe value
+      result._2.asInstanceOf[GetSucceeded].value.get.value shouldBe value
+      result._3.isInstanceOf[DeleteSucceeded] shouldBe true
     }
 
     "inc & dec" in {
@@ -51,11 +52,11 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
       val result = (for {
         _  <- connection.send(SetRequest(UUID.randomUUID(), key, 0, 10 seconds))
         ir <- connection.send(IncrementRequest(UUID.randomUUID(), key, value))
-        gr <- connection.send(GetRequest(UUID.randomUUID(), NonEmptyList.of(key)))
+        gr <- connection.send(GetRequest(UUID.randomUUID(), key))
         dr <- connection.send(DecrementRequest(UUID.randomUUID(), key, value))
       } yield (ir, gr, dr)).runAsync.futureValue
       result._1.asInstanceOf[IncrementSucceeded].value shouldBe 1
-      result._2.asInstanceOf[GetSucceeded].value.get(0).value.toInt shouldBe value
+      result._2.asInstanceOf[GetSucceeded].value.get.value.toInt shouldBe value
       result._3.asInstanceOf[DecrementSucceeded].value shouldBe 0
     }
 
