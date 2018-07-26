@@ -38,6 +38,26 @@ val coreSettings = Seq(
   pomIncludeRepository := { _ =>
     false
   },
+  pomExtra := {
+    <url>https://github.com/j5ik2o/reactive-memcached</url>
+      <licenses>
+        <license>
+          <name>The MIT License</name>
+          <url>http://opensource.org/licenses/MIT</url>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:j5ik2o/reactive-memcached.git</url>
+        <connection>scm:git:github.com/j5ik2o/reactive-memcached</connection>
+        <developerConnection>scm:git:git@github.com:j5ik2o/reactive-memcached.git</developerConnection>
+      </scm>
+      <developers>
+        <developer>
+          <id>j5ik2o</id>
+          <name>Junichi Kato</name>
+        </developer>
+      </developers>
+  },
   publishTo in ThisBuild := sonatypePublishTo.value,
   credentials := {
     val ivyCredentials = (baseDirectory in LocalRootProject).value / ".credentials"
