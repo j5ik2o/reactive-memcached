@@ -16,6 +16,8 @@ jobs:
       TERM: dumb
 
     steps:
+      - run: sudo apt-get install libevent-dev
+
       - checkout
 
       - restore_cache:
@@ -30,6 +32,3 @@ jobs:
           key: v1-dependencies--{{ checksum "build.sbt" }}
       - run: sbt +test
 
-dependencies:
-  pre:
-    - sudo apt-get update; sudo apt-get install libevent-dev
