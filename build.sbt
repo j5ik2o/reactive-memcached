@@ -171,4 +171,4 @@ lazy val `root` = (project in file("."))
   .settings(
     name := "reactive-memcached-project"
   )
-  .aggregate(core, `pool-commons`, `pool-fop`, `pool-scala`, `pool-stormpot`)
+  .aggregate(core, `pool-commons`, `pool-fop`, `pool-scala`, `pool-stormpot`, test)
