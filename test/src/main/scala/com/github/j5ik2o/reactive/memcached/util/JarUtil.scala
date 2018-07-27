@@ -1,5 +1,4 @@
 package com.github.j5ik2o.reactive.memcached.util
-
 import java.io.File
 
 import com.google.common.io.{ Files, Resources }
