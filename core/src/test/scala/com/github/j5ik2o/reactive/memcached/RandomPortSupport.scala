@@ -22,3 +22,5 @@ trait RandomPortSupport {
   def temporaryServerPort(interface: String = "127.0.0.1"): Int =
     temporaryServerHostnameAndPort(interface)._2
 }
+
+object RandomPortSupport extends RandomPortSupport

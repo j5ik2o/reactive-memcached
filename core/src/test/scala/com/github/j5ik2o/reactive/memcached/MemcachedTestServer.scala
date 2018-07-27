@@ -10,11 +10,12 @@ import scala.collection.JavaConverters._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int] = None) extends RandomPortSupport {
+class MemcachedTestServer(portOpt: Option[Int] = None,
+                          masterPortOpt: Option[Int] = None,
+                          forbiddenPorts: Seq[Int] = 6300.until(7300)) {
   lazy val logger: Logger = LoggerFactory.getLogger(getClass)
   @volatile
   private[this] var process: Option[Process] = None
-  private[this] val forbiddenPorts           = 6300.until(7300)
   @volatile
   private var _address: Option[InetSocketAddress] = None
 
@@ -24,9 +25,9 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
 
   val path: String = JarUtil
     .extractExecutableFromJar(if (OSType.ofAuto == OSType.macOS) {
-      "memcached-1.5.9.app"
+      "memcached-1.5.9.macOS"
     } else {
-      "memcached-1.5.9.elf"
+      "memcached-1.5.9.Linux"
     })
     .getPath
 
@@ -42,7 +43,7 @@ class MemcachedTestServer(portOpt: Option[Int] = None, masterPortOpt: Option[Int
   private[this] def findAddress(): InetSocketAddress = {
     var tries = 100
     while (_address.isEmpty && tries >= 0) {
-      _address = Some(temporaryServerAddress())
+      _address = Some(RandomPortSupport.temporaryServerAddress())
       if (forbiddenPorts.contains(_address.get.getPort)) {
         _address = None
         tries -= 1

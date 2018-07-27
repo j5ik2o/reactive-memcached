@@ -4,7 +4,7 @@ import org.scalatest.{ BeforeAndAfterAll, Suite }
 
 import scala.concurrent.ExecutionContext
 
-trait MemcachedSpecSupport extends RandomPortSupport with Suite with BeforeAndAfterAll {
+trait MemcachedSpecSupport extends Suite with BeforeAndAfterAll {
 
   private var _memcachedTestServer: MemcachedTestServer = _
 
