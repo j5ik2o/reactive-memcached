@@ -1,9 +1,11 @@
 package com.github.j5ik2o.reactive.memcached
-
 import org.scalatest.{ BeforeAndAfterAll, Suite }
 
 import scala.concurrent.ExecutionContext
 
+@SuppressWarnings(
+  Array("org.wartremover.warts.Null", "org.wartremover.warts.Var", "org.wartremover.warts.MutableDataStructures")
+)
 trait MemcachedSpecSupport extends Suite with BeforeAndAfterAll {
 
   private var _memcachedTestServer: MemcachedTestServer = _

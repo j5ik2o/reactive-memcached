@@ -10,6 +10,17 @@ import scala.collection.JavaConverters._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
+@SuppressWarnings(
+  Array(
+    "org.wartremover.warts.Var",
+    "org.wartremover.warts.Null",
+    "org.wartremover.warts.Serializable",
+    "org.wartremover.warts.Equals",
+    "org.wartremover.warts.OptionPartial",
+    "org.wartremover.warts.Recursion",
+    "org.wartremover.warts.While"
+  )
+)
 class MemcachedTestServer(portOpt: Option[Int] = None,
                           masterPortOpt: Option[Int] = None,
                           forbiddenPorts: Seq[Int] = 6300.until(7300)) {
