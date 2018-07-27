@@ -1,7 +1,9 @@
 # reactive-mecached
 
 [![CircleCI](https://circleci.com/gh/j5ik2o/reactive-memcached/tree/master.svg?style=svg)](https://circleci.com/gh/j5ik2o/reactive-memcached/tree/master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.j5ik2o/reactive-redis_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.j5ik2o/reactive-redis_2.12)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/0f8d5414b1da449d85299daa9934c899)](https://www.codacy.com/app/j5ik2o/reactive-memached?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=j5ik2o/reactive-memached&amp;utm_campaign=Badge_Grade)
+[![License: MIT](http://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
 Akka-Stream based Memcached Client for Scala
 
