@@ -9,7 +9,6 @@ import monix.execution.Scheduler
 import scala.concurrent.duration._
 
 class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClientSpec")) {
-  implicit val scheduler = Scheduler(system.dispatcher)
 
   var connection: MemcachedConnection = _
 

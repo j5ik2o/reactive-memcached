@@ -68,7 +68,7 @@ object CommonsPool {
 
     val log = Logging(system, this)
 
-    private val redisClient = MemcachedClient()
+    private val client = MemcachedClient()
 
     override def create(): MemcachedConnectionPoolable =
       MemcachedConnectionPoolable(index, newConnection(peerConfig, supervisionDecider))
@@ -81,8 +81,8 @@ object CommonsPool {
 
     override def validateObject(p: PooledObject[MemcachedConnectionPoolable]): Boolean = {
       true
-      // val connection = p.getObject
-      // redisClient.validate(validationTimeout).run(connection)
+      //val connection = p.getObject
+      //redisClient.validate(validationTimeout).run(connection)
     }
 
   }
