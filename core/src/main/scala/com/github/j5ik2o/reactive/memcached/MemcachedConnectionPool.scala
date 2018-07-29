@@ -136,7 +136,12 @@ object MemcachedConnectionPool {
     }
 
     override def borrowConnection: Task[MemcachedConnection] = Task.deferFutureAction { implicit ec =>
-      (connectionPoolActor ? BorrowConnection).mapTo[ConnectionGotten].map(_.memcachedConnection)(ec)
+      (connectionPoolActor ? BorrowConnection)
+        .mapTo[ConnectionGotten]
+        .map { v =>
+          logger.debug("reply = {}", v)
+          v.memcachedConnection
+        }(ec)
     }
 
     override def returnConnection(memcachedConnection: MemcachedConnection): Task[Unit] = {

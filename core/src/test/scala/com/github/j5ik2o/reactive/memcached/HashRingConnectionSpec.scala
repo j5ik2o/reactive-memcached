@@ -1,11 +1,13 @@
 package com.github.j5ik2o.reactive.memcached
+
 import java.net.InetSocketAddress
 import java.util.UUID
 
 import akka.actor.ActorSystem
 import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
 import cats.implicits._
+import monix.execution.Scheduler
+
 import scala.collection.mutable.ListBuffer
 
 class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConnectionSpec")) {
@@ -18,10 +20,17 @@ class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConn
 
   val client = MemcachedClient()
 
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
+  def startSecondServer(): Unit = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     secondServer = new MemcachedTestServer()
     secondServer.start()
+  }
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    startSecondServer
+
+    implicit val scheduler = Scheduler(system.dispatcher)
     val p1 = MemcachedConnectionPool.ofSingleRoundRobin(
       sizePerPeer = 2,
       peerConfig = PeerConfig(
@@ -51,10 +60,11 @@ class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConn
 
   "HashRingConnection" - {
     "set & get" in {
-      val key1   = UUID.randomUUID().toString
-      val value1 = UUID.randomUUID().toString
-      val key2   = UUID.randomUUID().toString
-      val value2 = UUID.randomUUID().toString
+      implicit val scheduler = Scheduler(system.dispatcher)
+      val key1               = UUID.randomUUID().toString
+      val value1             = UUID.randomUUID().toString
+      val key2               = UUID.randomUUID().toString
+      val value2             = UUID.randomUUID().toString
       val result = (for {
         _  <- client.set(key1, value1)
         r1 <- client.get(key1)

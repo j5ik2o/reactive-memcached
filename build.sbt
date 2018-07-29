@@ -80,7 +80,6 @@ val coreSettings = Seq(
     "ch.qos.logback"      % "logback-classic"               % "1.2.3" % Test,
     "de.flapdoodle.embed" % "de.flapdoodle.embed.memcached" % "1.06.4" % Test
   ),
-  //  Global / concurrentRestrictions += Tags.limit(Tags.Test, 1),
   parallelExecution in Test := false,
   wartremoverErrors ++= Warts.allBut(Wart.Any,
                                      Wart.Throw,

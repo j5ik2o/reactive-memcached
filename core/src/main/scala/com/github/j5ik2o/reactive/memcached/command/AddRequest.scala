@@ -15,6 +15,7 @@ final case class AddRequest private (override val id: UUID,
                                      override val flags: Int,
                                      override val noReply: Boolean)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
+
   override protected val commandName: String = "add"
 
   override type Response = AddResponse

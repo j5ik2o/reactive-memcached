@@ -4,13 +4,15 @@ import java.net.InetSocketAddress
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import cats.data.NonEmptyList
-import com.github.j5ik2o.reactive.memcached.command._
-import monix.execution.Scheduler.Implicits.global
 import cats.implicits._
+import com.github.j5ik2o.reactive.memcached.command._
+import monix.execution.Scheduler
+
 import scala.concurrent.duration._
 
 class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedConnectionSpec")) {
+
+  implicit val scheduler = Scheduler(system.dispatcher)
 
   var connection: MemcachedConnection = _
 
@@ -44,6 +46,41 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
       result._1.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._2.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._3.isInstanceOf[DeleteSucceeded] shouldBe true
+    }
+
+    "add" in {
+      val key   = UUID.randomUUID().toString
+      val value = UUID.randomUUID().toString
+      connection
+        .send(AddRequest(UUID.randomUUID(), key, value))
+        .runAsync
+        .futureValue
+        .isInstanceOf[AddSucceeded] shouldBe true
+      connection
+        .send(AddRequest(UUID.randomUUID(), key, value))
+        .runAsync
+        .futureValue
+        .isInstanceOf[AddNotStored] shouldBe true
+    }
+
+    "replace" in {
+      val key   = UUID.randomUUID().toString
+      val value = UUID.randomUUID().toString
+      connection
+        .send(ReplaceRequest(UUID.randomUUID(), key, value))
+        .runAsync
+        .futureValue
+        .isInstanceOf[ReplaceNotStored] shouldBe true
+      connection
+        .send(SetRequest(UUID.randomUUID(), key, value))
+        .runAsync
+        .futureValue
+        .isInstanceOf[SetSucceeded] shouldBe true
+      connection
+        .send(ReplaceRequest(UUID.randomUUID(), key, value))
+        .runAsync
+        .futureValue
+        .isInstanceOf[ReplaceSucceeded] shouldBe true
     }
 
     "inc & dec" in {

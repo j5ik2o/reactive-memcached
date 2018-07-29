@@ -1,6 +1,6 @@
 package com.github.j5ik2o.reactive.memcached.pool
 
-import akka.actor.{ Actor, ActorSystem, Props }
+import akka.actor.{ Actor, ActorLogging, ActorSystem, Props }
 import akka.pattern.pipe
 import akka.stream.Supervision
 import akka.util.Timeout
@@ -31,7 +31,8 @@ class MemcachedConnectionActor(peerConfig: PeerConfig,
                                supervisionDecider: Option[Supervision.Decider],
                                passingTimeout: FiniteDuration)(
     implicit scheduler: Scheduler
-) extends Actor {
+) extends Actor
+    with ActorLogging {
 
   private implicit val as: ActorSystem        = context.system
   private val connection: MemcachedConnection = newConnection(peerConfig, supervisionDecider)
@@ -41,7 +42,9 @@ class MemcachedConnectionActor(peerConfig: PeerConfig,
     case cmdReq: CommandRequestBase =>
       connection.send(cmdReq).runAsync.mapTo[CommandResponse].pipeTo(sender())
     case BorrowConnection =>
+      log.debug("msg = BorrowConnection")
       sender() ! ConnectionGotten(connection)
+      log.debug(s"reply = ConnectionGotten($connection)")
   }
 
 }

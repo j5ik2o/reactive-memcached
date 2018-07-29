@@ -20,8 +20,8 @@ final class GetRequest private (val id: UUID, val key: String) extends CommandRe
   override protected def parseResponse: Handler = {
     case (EndExpr, next) =>
       (GetSucceeded(UUID.randomUUID(), id, None), next)
-    case (ValueExpr(key, flags, expireTime, value), next) =>
-      (GetSucceeded(UUID.randomUUID(), id, Some(ValueDesc(key, flags, expireTime, value))), next)
+    case (ValueExpr(key, flags, length, casUnique, value), next) =>
+      (GetSucceeded(UUID.randomUUID(), id, Some(ValueDesc(key, flags, length, casUnique, value))), next)
     case (ErrorExpr, next) =>
       (GetFailed(UUID.randomUUID(), id, MemcachedIOException(ErrorType.OtherType, None)), next)
     case (ClientErrorExpr(msg), next) =>
@@ -38,7 +38,7 @@ object GetRequest {
 
 }
 
-final case class ValueDesc(key: String, flags: Int, expire: Long, value: String)
+final case class ValueDesc(key: String, flags: Int, length: Long, casUnique: Option[Long], value: String)
 
 sealed trait GetResponse                                                           extends CommandResponse
 final case class GetSucceeded(id: UUID, requestId: UUID, value: Option[ValueDesc]) extends GetResponse
