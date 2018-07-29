@@ -17,15 +17,19 @@ sealed trait ArchitectureType extends EnumEntry
 object ArchitectureType extends Enum[ArchitectureType] {
   override def values: immutable.IndexedSeq[ArchitectureType] = findValues
 
+  // scalastyle:off
   case object x86 extends ArchitectureType
 
   case object x64 extends ArchitectureType
+  // scalastyle:on
 
   private def getWindowsArchitecture(): ArchitectureType = {
+    // scalastyle:off
     val arch      = System.getenv("PROCESSOR_ARCHITECTURE")
     val wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432")
     if (!arch.endsWith("64") && (wow64Arch == null || !wow64Arch.endsWith("64"))) x86
     else x64
+    // scalastyle:on
   }
 
   private def getUnixArchitecture(): ArchitectureType = {

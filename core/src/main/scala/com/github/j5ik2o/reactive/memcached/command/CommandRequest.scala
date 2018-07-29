@@ -24,11 +24,31 @@
 package com.github.j5ik2o.reactive.memcached.command
 
 import java.text.ParseException
+import java.util.UUID
 
+import com.github.j5ik2o.reactive.memcached.parser.model.Expr
+import fastparse.core
 import fastparse.core.Parsed
 import scodec.bits.ByteVector
 
-trait CommandRequest extends CommandRequestBase {
+trait CommandRequest {
+  type Elem
+  type Repr
+  type P[+T] = core.Parser[T, Elem, Repr]
+
+  type Response <: CommandResponse
+
+  type Handler = PartialFunction[(Expr, Int), (Response, Int)]
+
+  val id: UUID
+  val key: String
+  val isMasterOnly: Boolean
+
+  def asString: String
+
+  protected def responseParser: P[Expr]
+
+  protected def convertToParseSource(s: ByteVector): Repr
 
   def parse(text: ByteVector, index: Int = 0): Either[ParseException, (Response, Int)] = {
     responseParser.parse(convertToParseSource(text), index) match {

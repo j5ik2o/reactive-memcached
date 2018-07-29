@@ -23,7 +23,9 @@ import scala.util.{ Failure, Success }
 )
 class MemcachedTestServer(portOpt: Option[Int] = None,
                           masterPortOpt: Option[Int] = None,
+                          // scalastyle:off
                           forbiddenPorts: Seq[Int] = 6300.until(7300)) {
+  // scalastyle:on
   lazy val logger: Logger = LoggerFactory.getLogger(getClass)
   @volatile
   private[this] var process: Option[Process] = None
@@ -44,8 +46,10 @@ class MemcachedTestServer(portOpt: Option[Int] = None,
 
   private[this] def assertMemcachedBinaryPresent()(implicit ec: ExecutionContext): Unit = {
     val p = new ProcessBuilder(path, "--help").start()
+    // scalastyle:off
     printlnStreamFuture(new BufferedReader(new InputStreamReader(p.getInputStream)))
     printlnStreamFuture(new BufferedReader(new InputStreamReader(p.getErrorStream)))
+    // scalastyle:on
     p.waitFor()
     val exitValue = p.exitValue()
     require(exitValue == 0 || exitValue == 1, "memcached binary must be present.")

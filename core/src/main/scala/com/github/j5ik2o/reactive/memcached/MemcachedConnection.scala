@@ -20,10 +20,10 @@ import akka.stream.scaladsl.{
   Zip
 }
 import akka.util.ByteString
-import com.github.j5ik2o.reactive.memcached.command.{ CommandRequestBase, CommandResponse }
+import cats.implicits._
+import com.github.j5ik2o.reactive.memcached.command.{ CommandRequest, CommandResponse }
 import monix.eval.Task
 import monix.execution.Scheduler
-import cats.implicits._
 
 import scala.concurrent.{ Future, Promise }
 
@@ -50,9 +50,9 @@ trait MemcachedConnection {
   def id: UUID
   def shutdown(): Unit
   def peerConfig: Option[PeerConfig]
-  def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response]
+  def send[C <: CommandRequest](cmd: C): Task[cmd.Response]
 
-  def toFlow[C <: CommandRequestBase](
+  def toFlow[C <: CommandRequest](
       parallelism: Int = 1
   )(implicit scheduler: Scheduler): Flow[C, C#Response, NotUsed] =
     Flow[C].mapAsync(parallelism) { cmd =>
@@ -68,6 +68,7 @@ private[memcached] class MemcachedConnectionImpl(_peerConfig: PeerConfig,
   override def id: UUID = UUID.randomUUID()
 
   val peerConfig = Some(_peerConfig)
+
   import _peerConfig._
   import _peerConfig.backoffConfig._
 
@@ -125,7 +126,7 @@ private[memcached] class MemcachedConnectionImpl(_peerConfig: PeerConfig,
 
   override def shutdown(): Unit = killSwitch.shutdown()
 
-  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = Task.deferFutureAction { implicit ec =>
+  override def send[C <: CommandRequest](cmd: C): Task[cmd.Response] = Task.deferFutureAction { implicit ec =>
     val promise = Promise[CommandResponse]()
     requestQueue
       .offer(RequestContext(cmd, promise, ZonedDateTime.now()))

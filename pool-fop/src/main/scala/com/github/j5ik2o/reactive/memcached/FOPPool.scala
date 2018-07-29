@@ -6,16 +6,19 @@ import akka.actor.ActorSystem
 import akka.stream.Supervision
 import cats.data.NonEmptyList
 import cn.danielw.fop.{ ObjectFactory, ObjectPool, PoolConfig, Poolable }
-import com.github.j5ik2o.reactive.memcached.command.CommandRequestBase
+import com.github.j5ik2o.reactive.memcached.command.CommandRequest
 import monix.eval.Task
 import monix.execution.Scheduler
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 final case class FOPConnectionWithIndex(index: Int, memcachedConnection: MemcachedConnection)
     extends MemcachedConnection {
-  override def id: UUID                                                  = memcachedConnection.id
-  override def peerConfig: Option[PeerConfig]                            = memcachedConnection.peerConfig
-  override def shutdown(): Unit                                          = memcachedConnection.shutdown()
-  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = memcachedConnection.send(cmd)
+  override def id: UUID                                              = memcachedConnection.id
+  override def peerConfig: Option[PeerConfig]                        = memcachedConnection.peerConfig
+  override def shutdown(): Unit                                      = memcachedConnection.shutdown()
+  override def send[C <: CommandRequest](cmd: C): Task[cmd.Response] = memcachedConnection.send(cmd)
 
 }
 
@@ -54,8 +57,8 @@ object FOPPool {
       }
 
       override def validate(t: MemcachedConnection): Boolean = {
-        true
-        //client.validate(connectionPoolConfig.validationTimeout.getOrElse(3 seconds)).run(t)
+        Await.result(client.version().map(_.nonEmpty).run(t).runAsync,
+                     connectionPoolConfig.validationTimeout.getOrElse(3 seconds))
       }
     }
 

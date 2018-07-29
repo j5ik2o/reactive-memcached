@@ -42,9 +42,13 @@ object StringParsers {
       }
   //val values: P[ValuesExpr] = P(value.rep(1) ~ end).map { case (v, _) => ValuesExpr(v) }
 
+  val version: P[VersionExpr] = P("VERSION" ~ " " ~ alphaDigit.rep(1).!).map(VersionExpr)
+
   val retrievalCommandResponse: P[Expr] = P(end | value | allErrors)
 
   val deletionCommandResponse: P[Expr] = P(deleted | notFound | allErrors)
 
   val touchCommandResponse: P[Expr] = P(touched | notFound | allErrors)
+
+  val versionCommandResponse: P[Expr] = P(version | allErrors)
 }

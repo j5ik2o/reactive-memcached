@@ -8,20 +8,21 @@ import akka.event.{ LogSource, Logging }
 import akka.stream.Supervision
 import cats.data.NonEmptyList
 import com.github.j5ik2o.reactive.memcached.CommonsPool.MemcachedConnectionPoolFactory
-import com.github.j5ik2o.reactive.memcached.command.CommandRequestBase
+import com.github.j5ik2o.reactive.memcached.command.CommandRequest
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.apache.commons.pool2.impl.{ DefaultPooledObject, GenericObjectPool, GenericObjectPoolConfig }
 import org.apache.commons.pool2.{ BasePooledObjectFactory, PooledObject }
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 final case class MemcachedConnectionPoolable(index: Int, memcachedConnection: MemcachedConnection)
     extends MemcachedConnection {
-  override def id: UUID                                                  = memcachedConnection.id
-  override def peerConfig: Option[PeerConfig]                            = memcachedConnection.peerConfig
-  override def shutdown(): Unit                                          = memcachedConnection.shutdown()
-  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = memcachedConnection.send(cmd)
+  override def id: UUID                                              = memcachedConnection.id
+  override def peerConfig: Option[PeerConfig]                        = memcachedConnection.peerConfig
+  override def shutdown(): Unit                                      = memcachedConnection.shutdown()
+  override def send[C <: CommandRequest](cmd: C): Task[cmd.Response] = memcachedConnection.send(cmd)
 
 }
 object CommonsPool {
@@ -80,9 +81,7 @@ object CommonsPool {
       new DefaultPooledObject(t)
 
     override def validateObject(p: PooledObject[MemcachedConnectionPoolable]): Boolean = {
-      true
-      //val connection = p.getObject
-      //redisClient.validate(validationTimeout).run(connection)
+      Await.result(client.version().map(_.nonEmpty).run(p.getObject).runAsync, validationTimeout)
     }
 
   }
