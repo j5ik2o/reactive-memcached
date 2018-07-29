@@ -68,6 +68,7 @@ private[memcached] class MemcachedConnectionImpl(_peerConfig: PeerConfig,
   override def id: UUID = UUID.randomUUID()
 
   val peerConfig = Some(_peerConfig)
+
   import _peerConfig._
   import _peerConfig.backoffConfig._
 
