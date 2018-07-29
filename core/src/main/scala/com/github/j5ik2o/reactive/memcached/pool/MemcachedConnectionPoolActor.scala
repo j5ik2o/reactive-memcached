@@ -19,7 +19,9 @@ class MemcachedConnectionPoolActor(pool: Pool, connectionProps: NonEmptyList[Pro
   private val routers: NonEmptyList[ActorRef] = connectionProps.map(p => context.actorOf(pool.props(p)))
 
   override def receive: Receive = {
-    case msg => routers.toList(index.getAndIncrement().toInt % routers.size) forward msg
+    case msg =>
+      log.debug("msg = {}", msg)
+      routers.toList(index.getAndIncrement().toInt % routers.size) forward msg
   }
 
 }
