@@ -3,15 +3,18 @@ import akka.actor.ActorSystem
 import monix.execution.Scheduler
 import stormpot.{ Expiration, SlotInfo }
 
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 final case class MemcachedConnectionExpiration(validationTimeout: Duration)(implicit system: ActorSystem,
                                                                             scheduler: Scheduler)
     extends Expiration[MemcachedConnectionPoolable] {
-  //private val redisClient = RedisClient()
+
+  private val client = MemcachedClient()
+
   override def hasExpired(slotInfo: SlotInfo[_ <: MemcachedConnectionPoolable]): Boolean = {
-    false
-    // !redisClient.validate(validationTimeout).run(slotInfo.getPoolable.redisConnection)
+    !Await.result(client.version().map(_.nonEmpty).run(slotInfo.getPoolable.memcachedConnection).runAsync,
+                  validationTimeout)
   }
 
 }

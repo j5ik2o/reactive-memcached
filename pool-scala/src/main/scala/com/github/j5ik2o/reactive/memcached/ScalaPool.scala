@@ -9,6 +9,7 @@ import io.github.andrebeat.pool._
 import monix.eval.Task
 import monix.execution.Scheduler
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object ScalaPool {
@@ -43,6 +44,8 @@ final class ScalaPool private (val connectionPoolConfig: ScalaPoolConfig,
   val DEFAULT_MAX_IDLE_TIME: FiniteDuration      = 5 seconds
   val DEFAULT_VALIDATION_TIMEOUT: FiniteDuration = 3 seconds
 
+  private val client = MemcachedClient()
+
   private def newPool(peerConfig: PeerConfig): Pool[MemcachedConnection] =
     Pool[MemcachedConnection](
       connectionPoolConfig.sizePerPeer.getOrElse(DEFAULT_MAX_TOTAL),
@@ -56,8 +59,8 @@ final class ScalaPool private (val connectionPoolConfig: ScalaPoolConfig,
       },
       dispose = { _.shutdown() },
       healthCheck = { con =>
-        true
-      // redisClient.validate(connectionPoolConfig.validationTimeout.getOrElse(DEFAULT_VALIDATION_TIMEOUT)).run(con)
+        Await.result(client.version().map(_.nonEmpty).run(con).runAsync,
+                     connectionPoolConfig.validationTimeout.getOrElse(DEFAULT_VALIDATION_TIMEOUT))
       }
     )
 

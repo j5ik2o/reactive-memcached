@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import akka.util.ByteString
-import com.github.j5ik2o.reactive.memcached.command.{ CommandRequest, CommandRequestBase, CommandResponse }
+import com.github.j5ik2o.reactive.memcached.command.{ CommandRequest, CommandResponse }
 import scodec.bits.ByteVector
 
 import scala.util.Try
@@ -28,7 +28,7 @@ final case class ResponseContext(byteString: ByteString,
                                  responseAt: ZonedDateTime = ZonedDateTime.now)
     extends ResponseBase {
 
-  val commandRequest: CommandRequestBase = requestContext.commandRequest
+  val commandRequest: CommandRequest = requestContext.commandRequest
 
   def withRequestsInTx(values: Seq[CommandRequest]): ResponseContext = copy(requestsInTx = values)
 

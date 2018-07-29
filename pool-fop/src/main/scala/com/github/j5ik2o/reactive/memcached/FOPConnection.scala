@@ -3,7 +3,7 @@ package com.github.j5ik2o.reactive.memcached
 import java.util.UUID
 
 import cn.danielw.fop.Poolable
-import com.github.j5ik2o.reactive.memcached.command.CommandRequestBase
+import com.github.j5ik2o.reactive.memcached.command.CommandRequest
 import monix.eval.Task
 
 final case class FOPConnection(underlying: Poolable[MemcachedConnection]) extends MemcachedConnection {
@@ -15,6 +15,6 @@ final case class FOPConnection(underlying: Poolable[MemcachedConnection]) extend
 
   override def shutdown(): Unit = underlyingCon.shutdown()
 
-  override def send[C <: CommandRequestBase](cmd: C): Task[cmd.Response] = underlyingCon.send(cmd)
+  override def send[C <: CommandRequest](cmd: C): Task[cmd.Response] = underlyingCon.send(cmd)
 
 }

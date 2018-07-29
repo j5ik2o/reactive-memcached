@@ -4,7 +4,7 @@ import akka.actor.{ Actor, ActorLogging, ActorSystem, Props }
 import akka.pattern.pipe
 import akka.stream.Supervision
 import akka.util.Timeout
-import com.github.j5ik2o.reactive.memcached.command.{ CommandRequestBase, CommandResponse }
+import com.github.j5ik2o.reactive.memcached.command.{ CommandRequest, CommandResponse }
 import com.github.j5ik2o.reactive.memcached.pool.MemcachedConnectionActor.{ BorrowConnection, ConnectionGotten }
 import com.github.j5ik2o.reactive.memcached.{ MemcachedConnection, PeerConfig }
 import monix.execution.Scheduler
@@ -39,7 +39,7 @@ class MemcachedConnectionActor(peerConfig: PeerConfig,
   implicit val to: Timeout                    = passingTimeout
 
   override def receive: Receive = {
-    case cmdReq: CommandRequestBase =>
+    case cmdReq: CommandRequest =>
       connection.send(cmdReq).runAsync.mapTo[CommandResponse].pipeTo(sender())
     case BorrowConnection =>
       log.debug("msg = BorrowConnection")

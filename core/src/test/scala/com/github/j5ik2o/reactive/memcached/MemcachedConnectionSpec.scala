@@ -6,7 +6,6 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import cats.implicits._
 import com.github.j5ik2o.reactive.memcached.command._
-import monix.execution.Scheduler
 
 import scala.concurrent.duration._
 
