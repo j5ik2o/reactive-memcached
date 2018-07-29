@@ -2,7 +2,6 @@ package com.github.j5ik2o.reactive.memcached.parser
 
 import com.github.j5ik2o.reactive.memcached.parser.model._
 import fastparse.all._
-import fastparse.core
 
 object StringParsers {
 
@@ -25,18 +24,20 @@ object StringParsers {
   val exists: P[ExistsExpr.type]       = P("EXISTS" ~ crlf).map(_ => ExistsExpr)
   val notFound: P[NotFoundExpr.type]   = P("NOT_FOUND" ~ crlf).map(_ => NotFoundExpr)
 
-  val key: P[String]      = (!" " ~/ AnyChar).rep(1).!
-  val flags: P[Int]       = digit.rep(1).!.map(_.toInt)
-  val expireTime: P[Long] = digit.rep(1).!.map(_.toLong)
+  val key: P[String]     = (!" " ~/ AnyChar).rep(1).!
+  val flags: P[Int]      = digit.rep(1).!.map(_.toInt)
+  val bytes: P[Long]     = digit.rep(1).!.map(_.toLong)
+  val casUnique: P[Long] = digit.rep(1).!.map(_.toLong)
 
   val incOrDecCommandResponse: P[Expr] = P(notFound | ((!crlf ~/ AnyChar).rep.! ~ crlf).map(StringExpr) | allErrors)
   val storageCommandResponse: P[Expr]  = P((stored | notStored | exists | notFound) | allErrors)
 
   val value: P[ValueExpr] =
-    P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ expireTime ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf).map {
-      case (key, flags, expireTime, value) =>
-        ValueExpr(key, flags, expireTime, value)
-    }
+    P("VALUE" ~ " " ~ key ~ " " ~ flags ~ " " ~ bytes ~ (" " ~ casUnique).? ~ crlf ~ (!crlf ~/ AnyChar).rep.! ~ crlf)
+      .map {
+        case (key, flags, bytes, cas, value) =>
+          ValueExpr(key, flags, bytes, cas, value)
+      }
   //val values: P[ValuesExpr] = P(value.rep(1) ~ end).map { case (v, _) => ValuesExpr(v) }
 
   val retrievalCommandResponse: P[Expr] = P(end | value | allErrors)

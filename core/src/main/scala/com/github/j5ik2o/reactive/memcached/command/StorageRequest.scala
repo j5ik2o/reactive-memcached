@@ -19,12 +19,15 @@ abstract class StorageRequest(val id: UUID,
     with StringParsersSupport {
 
   protected val commandName: String
-  override val isMasterOnly: Boolean = true
+  override val isMasterOnly: Boolean    = true
+  protected val casUnique: Option[Long] = None
+  protected lazy val isCas: Boolean          = casUnique.nonEmpty
 
   private def toSeconds: Long = if (expireDuration.isFinite()) expireDuration.toSeconds else 0
   private def bytes: Int      = value.getBytes(StandardCharsets.UTF_8).length
 
-  override def asString: String = s"$commandName $key $flags $toSeconds $bytes\r\n$value"
+  override def asString: String =
+    s"$commandName $key $flags $toSeconds $bytes${casUnique.fold("")(v => s" $v")}\r\n$value"
 
   override protected def responseParser: P[Expr] =
     if (noReply) P(End).map(_ => EmptyExpr) else P(storageCommandResponse)

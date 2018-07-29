@@ -33,7 +33,7 @@ final class MemcachedClient()(implicit system: ActorSystem) {
     }
 
   def add[A: Show](key: String,
-                   value: String,
+                   value: A,
                    expire: Duration = Duration.Inf,
                    flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
     send(AddRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
@@ -80,6 +80,21 @@ final class MemcachedClient()(implicit system: ActorSystem) {
       case ReplaceFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
+  def cas[A: Show](
+                   key: String,
+                   value: A,
+                   casUnique: Long,
+                   expireDuration: Duration = Duration.Inf,
+                   flags: Int = 0
+                   ): ReaderTTaskMemcachedConnection[Int] =
+    send(CasRequest(UUID.randomUUID(), key, value, casUnique, expireDuration, flags)).flatMap{
+      case CasExisted(_, _)    => ReaderTTask.pure(0)
+      case CasNotFounded(_, _) => ReaderTTask.pure(0)
+      case CasNotStored(_, _)  => ReaderTTask.pure(0)
+      case CasSucceeded(_, _)  => ReaderTTask.pure(1)
+      case CasFailed(_, _, ex) => ReaderTTask.raiseError(ex)
+    }
+
   def increment(key: String, value: Long): ReaderTTaskMemcachedConnection[Option[Long]] =
     send(IncrementRequest(UUID.randomUUID(), key, value)).flatMap {
       case IncrementNotFound(_, _)          => ReaderTTask.pure(None)
@@ -98,6 +113,12 @@ final class MemcachedClient()(implicit system: ActorSystem) {
     send(GetRequest(UUID.randomUUID(), key)).flatMap {
       case GetSucceeded(_, _, result) => ReaderTTask.pure(result)
       case GetFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
+    }
+
+  def gets(key: String): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
+    send(GetsRequest(UUID.randomUUID(), key)).flatMap {
+      case GetsSucceeded(_, _, result) => ReaderTTask.pure(result)
+      case GetsFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
     }
 
   def delete(key: String): ReaderTTaskMemcachedConnection[Int] =
