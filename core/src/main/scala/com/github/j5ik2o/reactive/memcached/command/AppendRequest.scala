@@ -16,7 +16,7 @@ final class AppendRequest private (override val id: UUID,
                                    override val noReply: Boolean = false)
     extends StorageRequest(id, key, flags, expireDuration, value, noReply) {
 
-  override protected val commandName: String = "APPEND"
+  override protected val commandName: String = "append"
 
   override type Response = AppendResponse
 
