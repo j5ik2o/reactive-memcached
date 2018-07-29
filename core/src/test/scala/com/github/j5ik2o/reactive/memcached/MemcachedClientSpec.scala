@@ -6,6 +6,7 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import cats.implicits._
 import monix.execution.Scheduler
+import scala.concurrent.duration._
 
 class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClientSpec")) {
   implicit val scheduler = Scheduler(system.dispatcher)
@@ -87,6 +88,17 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
 
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique) should not be empty
+    }
+    "touch" in {
+      val expire = 3 * timeFactor seconds
+      val key    = UUID.randomUUID().toString
+      val value  = UUID.randomUUID().toString
+      (for {
+        _ <- client.set(key, value, expire)
+        _ <- client.touch(key, expire * 5)
+      } yield ()).run(connection).runAsync.futureValue
+      Thread.sleep(expire.toMillis)
+      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
     }
   }
 

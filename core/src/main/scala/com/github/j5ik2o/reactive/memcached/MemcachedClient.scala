@@ -128,4 +128,11 @@ final class MemcachedClient()(implicit system: ActorSystem) {
       case DeleteFailed(_, _, ex) => ReaderTTask.raiseError(ex)
     }
 
+  def touch(key: String, expireDuration: Duration): ReaderTTaskMemcachedConnection[Int] =
+    send(TouchRequest(UUID.randomUUID(), key, expireDuration)).flatMap {
+      case TouchNotFounded(_, _) => ReaderTTask.pure(0)
+      case TouchSucceeded(_, _)  => ReaderTTask.pure(1)
+      case TouchFailed(_, _, ex) => ReaderTTask.raiseError(ex)
+    }
+
 }

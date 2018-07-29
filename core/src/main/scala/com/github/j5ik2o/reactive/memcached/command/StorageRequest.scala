@@ -7,7 +7,7 @@ import com.github.j5ik2o.reactive.memcached.parser.StringParsers.storageCommandR
 import com.github.j5ik2o.reactive.memcached.parser.model.{ EmptyExpr, Expr }
 import fastparse.all._
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 abstract class StorageRequest(val id: UUID,
                               val key: String,
@@ -17,6 +17,8 @@ abstract class StorageRequest(val id: UUID,
                               val noReply: Boolean = false)
     extends CommandRequest
     with StringParsersSupport {
+
+  require(expireDuration.gt(1 seconds))
 
   protected val commandName: String
   override val isMasterOnly: Boolean    = true
