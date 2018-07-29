@@ -5,7 +5,6 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 class MemcachedConnectionPoolSpec extends AbstractMemcachedConnectionPoolSpec("MemcachedConnectionPoolSpec") {
-  implicit val scheduler = Scheduler(system.dispatcher)
   override protected def createConnectionPool(
       peerConfigs: NonEmptyList[PeerConfig]
   ): MemcachedConnectionPool[Task] =

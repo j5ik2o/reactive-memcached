@@ -3,6 +3,7 @@ package com.github.j5ik2o.reactive.memcached
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
+import monix.execution.Scheduler
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ BeforeAndAfterAll, FreeSpecLike, Matchers }
@@ -19,6 +20,8 @@ abstract class AbstractActorSpec(_system: ActorSystem)
     with ScalaFutures
     with PropertyChecks
     with MemcachedSpecSupport {
+
+  implicit val scheduler = Scheduler(system.dispatcher)
 
   val logger = LoggerFactory.getLogger(getClass)
 

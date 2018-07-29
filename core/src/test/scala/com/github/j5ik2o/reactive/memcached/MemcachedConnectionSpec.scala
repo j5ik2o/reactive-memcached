@@ -12,8 +12,6 @@ import scala.concurrent.duration._
 
 class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedConnectionSpec")) {
 
-  implicit val scheduler = Scheduler(system.dispatcher)
-
   var connection: MemcachedConnection = _
 
   override protected def beforeAll(): Unit = {

@@ -21,9 +21,8 @@ class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConn
   val client = MemcachedClient()
 
   def startSecondServer(): Unit = {
-    import scala.concurrent.ExecutionContext.Implicits.global
     secondServer = new MemcachedTestServer()
-    secondServer.start()
+    secondServer.start()(scala.concurrent.ExecutionContext.Implicits.global)
   }
 
   override protected def beforeAll(): Unit = {

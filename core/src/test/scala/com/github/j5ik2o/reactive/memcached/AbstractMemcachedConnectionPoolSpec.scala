@@ -10,7 +10,6 @@ import monix.eval.Task
 
 import scala.concurrent.duration._
 import cats.implicits._
-import monix.execution.Scheduler
 
 abstract class AbstractMemcachedConnectionPoolSpec(systemName: String)
     extends AbstractActorSpec(ActorSystem(systemName)) {
@@ -37,10 +36,9 @@ abstract class AbstractMemcachedConnectionPoolSpec(systemName: String)
 
   s"MemcachedConnectionPool_${UUID.randomUUID()}" - {
     "set & get" in {
-      implicit val scheduler = Scheduler(system.dispatcher)
-      val key1               = UUID.randomUUID().toString
-      val key2               = UUID.randomUUID().toString
-      val value              = UUID.randomUUID().toString
+      val key1  = UUID.randomUUID().toString
+      val key2  = UUID.randomUUID().toString
+      val value = UUID.randomUUID().toString
       val result = (for {
         _   <- ConnectionAutoClose(pool)(_.send(SetRequest(UUID.randomUUID(), key1, value, 10 seconds)))
         _   <- ConnectionAutoClose(pool)(_.send(SetRequest(UUID.randomUUID(), key2, value, 10 seconds)))
