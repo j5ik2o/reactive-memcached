@@ -41,7 +41,12 @@ final case class ReplaceRequest(override val id: UUID,
 
 object ReplaceRequest {
 
-  def apply[A](id: UUID, key: String, value: A, expireDuration: Duration, flags: Int, noReply: Boolean = false)(
+  def apply[A](id: UUID,
+               key: String,
+               value: A,
+               expireDuration: Duration = Duration.Inf,
+               flags: Int = 0,
+               noReply: Boolean = false)(
       implicit s: Show[A]
   ): ReplaceRequest = new ReplaceRequest(id, key, s.show(value), expireDuration, flags, noReply)
 
