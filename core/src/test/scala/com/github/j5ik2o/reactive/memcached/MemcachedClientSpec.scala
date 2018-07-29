@@ -5,9 +5,10 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import cats.implicits._
-import monix.execution.Scheduler.Implicits.global
+import monix.execution.Scheduler
 
 class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClientSpec")) {
+  implicit val scheduler = Scheduler(system.dispatcher)
 
   var connection: MemcachedConnection = _
 
@@ -31,24 +32,37 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
     "set & get" in {
       val key   = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
-      val result = (for {
+
+      client.get(key).run(connection).runAsync.futureValue shouldBe None
+
+      val result1 = (for {
         _ <- client.set(key, value)
         r <- client.get(key)
       } yield r).run(connection).runAsync.futureValue
 
-      result.map(_.value) shouldBe Some(value)
+      result1.map(_.value) shouldBe Some(value)
+
+      val result2 = (for {
+        _  <- client.set(key, UUID.randomUUID().toString)
+        r1 <- client.get(key)
+        _  <- client.set(key, UUID.randomUUID().toString)
+        r2 <- client.get(key)
+      } yield (r1, r2)).run(connection).runAsync.futureValue
+
+      result2._1.map(_.value) should not be result2._2.map(_.value)
+
     }
-    "set & add" in {
+    "add & get" in {
       val key   = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
-      val result = (for {
-        _   <- client.set(key, value)
-        gr1 <- client.get(key)
+      val result1 = (for {
         _   <- client.add(key, value)
         gr2 <- client.get(key)
       } yield gr2).run(connection).runAsync.futureValue
 
-      result.map(_.value) shouldBe Some(value)
+      result1.map(_.value) shouldBe Some(value)
+
+      client.add(key, value).run(connection).runAsync.futureValue shouldBe 0
     }
     "set & gets" in {
       val key   = UUID.randomUUID().toString

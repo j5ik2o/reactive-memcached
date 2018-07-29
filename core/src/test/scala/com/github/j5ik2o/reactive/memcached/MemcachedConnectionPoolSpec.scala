@@ -2,9 +2,10 @@ package com.github.j5ik2o.reactive.memcached
 import akka.routing.DefaultResizer
 import cats.data.NonEmptyList
 import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
+import monix.execution.Scheduler
 
 class MemcachedConnectionPoolSpec extends AbstractMemcachedConnectionPoolSpec("MemcachedConnectionPoolSpec") {
+  implicit val scheduler = Scheduler(system.dispatcher)
   override protected def createConnectionPool(
       peerConfigs: NonEmptyList[PeerConfig]
   ): MemcachedConnectionPool[Task] =
