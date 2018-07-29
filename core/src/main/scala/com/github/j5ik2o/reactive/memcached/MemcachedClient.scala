@@ -81,13 +81,13 @@ final class MemcachedClient()(implicit system: ActorSystem) {
     }
 
   def cas[A: Show](
-                   key: String,
-                   value: A,
-                   casUnique: Long,
-                   expireDuration: Duration = Duration.Inf,
-                   flags: Int = 0
-                   ): ReaderTTaskMemcachedConnection[Int] =
-    send(CasRequest(UUID.randomUUID(), key, value, casUnique, expireDuration, flags)).flatMap{
+      key: String,
+      value: A,
+      casUnique: Long,
+      expireDuration: Duration = Duration.Inf,
+      flags: Int = 0
+  ): ReaderTTaskMemcachedConnection[Int] =
+    send(CasRequest(UUID.randomUUID(), key, value, casUnique, expireDuration, flags)).flatMap {
       case CasExisted(_, _)    => ReaderTTask.pure(0)
       case CasNotFounded(_, _) => ReaderTTask.pure(0)
       case CasNotStored(_, _)  => ReaderTTask.pure(0)
