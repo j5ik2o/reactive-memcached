@@ -2,6 +2,7 @@ package com.github.j5ik2o.reactive.memcached.parser
 
 import com.github.j5ik2o.reactive.memcached.parser.model._
 import fastparse.all._
+import fastparse.core
 
 object StringParsers {
 
@@ -23,6 +24,7 @@ object StringParsers {
   val notStored: P[NotStoredExpr.type] = P("NOT_STORED" ~ crlf).map(_ => NotStoredExpr)
   val exists: P[ExistsExpr.type]       = P("EXISTS" ~ crlf).map(_ => ExistsExpr)
   val notFound: P[NotFoundExpr.type]   = P("NOT_FOUND" ~ crlf).map(_ => NotFoundExpr)
+  val touched: P[TouchedExpr.type]     = P("TOUCHED" ~ crlf).map(_ => TouchedExpr)
 
   val key: P[String]     = (!" " ~/ AnyChar).rep(1).!
   val flags: P[Int]      = digit.rep(1).!.map(_.toInt)
@@ -44,4 +46,5 @@ object StringParsers {
 
   val deletionCommandResponse: P[Expr] = P(deleted | notFound | allErrors)
 
+  val touchCommandResponse: P[Expr] = P(touched | notFound | allErrors)
 }
