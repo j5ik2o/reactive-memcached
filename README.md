@@ -18,6 +18,12 @@ Akka-Stream based Memcached Client for Scala
 
 https://github.com/memcached/memcached/blob/master/doc/protocol.txt
 
+- Supported commands
+  - "set", "add", "replace", "cas", "delete", "get", "gets", "gat", "gats", "touch", "version"
+- Not supported commands
+  - "append", "prepend", "slabs reassign", "slabs automove", "lru", "lru_crawler", "watch", "stats", "STAT items"
+  
+
 ## Installation
 
 Add the following to your sbt build (Scala 2.11.x, 2.12.x):
