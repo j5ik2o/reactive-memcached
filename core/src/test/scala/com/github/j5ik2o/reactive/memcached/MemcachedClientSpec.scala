@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import cats.implicits._
-import monix.execution.Scheduler
+
 import scala.concurrent.duration._
 
 class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClientSpec")) {
@@ -52,13 +52,13 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       result2._1.map(_.value) should not be result2._2.map(_.value)
 
     }
-    "add & get" in {
+    "add" in {
       val key   = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
       val result1 = (for {
-        _   <- client.add(key, value)
-        gr2 <- client.get(key)
-      } yield gr2).run(connection).runAsync.futureValue
+        _  <- client.add(key, value)
+        gr <- client.get(key)
+      } yield gr).run(connection).runAsync.futureValue
 
       result1.map(_.value) shouldBe Some(value)
 
@@ -68,9 +68,9 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val key   = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
       val result = (for {
-        _ <- client.set(key, value)
-        r <- client.gets(key)
-      } yield r).run(connection).runAsync.futureValue
+        _  <- client.set(key, value)
+        gr <- client.gets(key)
+      } yield gr).run(connection).runAsync.futureValue
 
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique) should not be empty
@@ -98,6 +98,32 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       } yield ()).run(connection).runAsync.futureValue
       Thread.sleep(expire.toMillis)
       client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+    }
+    "gat" in {
+      val expire = 3 * timeFactor seconds
+      val key    = UUID.randomUUID().toString
+      val value  = UUID.randomUUID().toString
+      val result = (for {
+        _  <- client.set(key, value, expire)
+        gr <- client.gat(key, expire * 5)
+      } yield gr).run(connection).runAsync.futureValue
+      Thread.sleep(expire.toMillis)
+      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+      result.map(_.value) shouldBe Some(value)
+      result.flatMap(_.casUnique).isEmpty shouldBe true
+    }
+    "gats" in {
+      val expire = 3 * timeFactor seconds
+      val key    = UUID.randomUUID().toString
+      val value  = UUID.randomUUID().toString
+      val result = (for {
+        _  <- client.set(key, value, expire)
+        gr <- client.gats(key, expire * 5)
+      } yield gr).run(connection).runAsync.futureValue
+      Thread.sleep(expire.toMillis)
+      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+      result.map(_.value) shouldBe Some(value)
+      result.flatMap(_.casUnique).nonEmpty shouldBe true
     }
   }
 

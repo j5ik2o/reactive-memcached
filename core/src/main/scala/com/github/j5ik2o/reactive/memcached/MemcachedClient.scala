@@ -21,9 +21,9 @@ final class MemcachedClient()(implicit system: ActorSystem) {
 
   def set[A: Show](key: String,
                    value: A,
-                   expire: Duration = Duration.Inf,
+                   expireDuration: Duration = Duration.Inf,
                    flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(SetRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
+    send(SetRequest(UUID.randomUUID(), key, value, expireDuration, flags)).flatMap {
       case SetExisted(_, _)    => ReaderTTask.pure(0)
       case SetNotFounded(_, _) => ReaderTTask.pure(0)
       case SetNotStored(_, _)  => ReaderTTask.pure(0)
@@ -33,9 +33,9 @@ final class MemcachedClient()(implicit system: ActorSystem) {
 
   def add[A: Show](key: String,
                    value: A,
-                   expire: Duration = Duration.Inf,
+                   expireDuration: Duration = Duration.Inf,
                    flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(AddRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
+    send(AddRequest(UUID.randomUUID(), key, value, expireDuration, flags)).flatMap {
       case AddExisted(_, _)    => ReaderTTask.pure(0)
       case AddNotFounded(_, _) => ReaderTTask.pure(0)
       case AddNotStored(_, _)  => ReaderTTask.pure(0)
@@ -45,9 +45,9 @@ final class MemcachedClient()(implicit system: ActorSystem) {
 
   def append[A: Show](key: String,
                       value: A,
-                      expire: Duration = Duration.Inf,
+                      expireDuration: Duration = Duration.Inf,
                       flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(AppendRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
+    send(AppendRequest(UUID.randomUUID(), key, value, expireDuration, flags)).flatMap {
       case AppendExisted(_, _)    => ReaderTTask.pure(0)
       case AppendNotFounded(_, _) => ReaderTTask.pure(0)
       case AppendNotStored(_, _)  => ReaderTTask.pure(0)
@@ -57,9 +57,9 @@ final class MemcachedClient()(implicit system: ActorSystem) {
 
   def prepend[A: Show](key: String,
                        value: A,
-                       expire: Duration = Duration.Inf,
+                       expireDuration: Duration = Duration.Inf,
                        flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(PrependRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
+    send(PrependRequest(UUID.randomUUID(), key, value, expireDuration, flags)).flatMap {
       case PrependExisted(_, _)    => ReaderTTask.pure(0)
       case PrependNotFounded(_, _) => ReaderTTask.pure(0)
       case PrependNotStored(_, _)  => ReaderTTask.pure(0)
@@ -69,9 +69,9 @@ final class MemcachedClient()(implicit system: ActorSystem) {
 
   def replace[A: Show](key: String,
                        value: A,
-                       expire: Duration = Duration.Inf,
+                       expireDuration: Duration = Duration.Inf,
                        flags: Int = 0): ReaderTTaskMemcachedConnection[Int] =
-    send(ReplaceRequest(UUID.randomUUID(), key, value, expire, flags)).flatMap {
+    send(ReplaceRequest(UUID.randomUUID(), key, value, expireDuration, flags)).flatMap {
       case ReplaceExisted(_, _)    => ReaderTTask.pure(0)
       case ReplaceNotFounded(_, _) => ReaderTTask.pure(0)
       case ReplaceNotStored(_, _)  => ReaderTTask.pure(0)
@@ -83,10 +83,10 @@ final class MemcachedClient()(implicit system: ActorSystem) {
       key: String,
       value: A,
       casUnique: Long,
-      expireDuration: Duration = Duration.Inf,
+      expireDurationDuration: Duration = Duration.Inf,
       flags: Int = 0
   ): ReaderTTaskMemcachedConnection[Int] =
-    send(CasRequest(UUID.randomUUID(), key, value, casUnique, expireDuration, flags)).flatMap {
+    send(CasRequest(UUID.randomUUID(), key, value, casUnique, expireDurationDuration, flags)).flatMap {
       case CasExisted(_, _)    => ReaderTTask.pure(0)
       case CasNotFounded(_, _) => ReaderTTask.pure(0)
       case CasNotStored(_, _)  => ReaderTTask.pure(0)
@@ -132,6 +132,18 @@ final class MemcachedClient()(implicit system: ActorSystem) {
       case TouchNotFounded(_, _) => ReaderTTask.pure(0)
       case TouchSucceeded(_, _)  => ReaderTTask.pure(1)
       case TouchFailed(_, _, ex) => ReaderTTask.raiseError(ex)
+    }
+
+  def gat(key: String, expireDuration: Duration): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
+    send(GatRequest(UUID.randomUUID(), key, expireDuration)).flatMap {
+      case GatSucceeded(_, _, result) => ReaderTTask.pure(result)
+      case GatFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
+    }
+
+  def gats(key: String, expireDuration: Duration): ReaderTTaskMemcachedConnection[Option[ValueDesc]] =
+    send(GatsRequest(UUID.randomUUID(), key, expireDuration)).flatMap {
+      case GatsSucceeded(_, _, result) => ReaderTTask.pure(result)
+      case GatsFailed(_, _, ex)        => ReaderTTask.raiseError(ex)
     }
 
   def version(): ReaderTTaskMemcachedConnection[String] =

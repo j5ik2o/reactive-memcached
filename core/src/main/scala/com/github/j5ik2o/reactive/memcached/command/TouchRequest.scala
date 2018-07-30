@@ -17,7 +17,8 @@ final case class TouchRequest(id: UUID, key: String, expireDuration: Duration)
   override type Response = TouchResponse
   override val isMasterOnly: Boolean = true
 
-  private def toSeconds: Long   = if (expireDuration.isFinite()) expireDuration.toSeconds else 0
+  private def toSeconds: Long = if (expireDuration.isFinite()) expireDuration.toSeconds else 0
+
   override def asString: String = s"touch $key $toSeconds"
 
   override protected def responseParser: P[Expr] = P(touchCommandResponse)
