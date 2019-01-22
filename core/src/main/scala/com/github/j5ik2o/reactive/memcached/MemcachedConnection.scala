@@ -56,7 +56,7 @@ trait MemcachedConnection {
       parallelism: Int = 1
   )(implicit scheduler: Scheduler): Flow[C, C#Response, NotUsed] =
     Flow[C].mapAsync(parallelism) { cmd =>
-      send(cmd).runAsync
+      send(cmd).runToFuture
     }
 }
 

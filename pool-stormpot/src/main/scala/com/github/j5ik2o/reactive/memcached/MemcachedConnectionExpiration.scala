@@ -13,7 +13,7 @@ final case class MemcachedConnectionExpiration(validationTimeout: Duration)(impl
   private val client = MemcachedClient()
 
   override def hasExpired(slotInfo: SlotInfo[_ <: MemcachedConnectionPoolable]): Boolean = {
-    !Await.result(client.version().map(_.nonEmpty).run(slotInfo.getPoolable.memcachedConnection).runAsync,
+    !Await.result(client.version().map(_.nonEmpty).run(slotInfo.getPoolable.memcachedConnection).runToFuture,
                   validationTimeout)
   }
 

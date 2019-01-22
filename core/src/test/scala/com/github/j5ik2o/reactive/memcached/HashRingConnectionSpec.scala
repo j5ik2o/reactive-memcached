@@ -69,7 +69,7 @@ class HashRingConnectionSpec extends AbstractActorSpec(ActorSystem("HashRingConn
         r1 <- client.get(key1)
         _  <- client.set(key2, value2)
         r2 <- client.get(key2)
-      } yield (r1, r2)).run(hashRingConnection).runAsync.futureValue
+      } yield (r1, r2)).run(hashRingConnection).runToFuture.futureValue
 
       result._1.map(_.value) shouldBe Some(value1)
       result._2.map(_.value) shouldBe Some(value2)

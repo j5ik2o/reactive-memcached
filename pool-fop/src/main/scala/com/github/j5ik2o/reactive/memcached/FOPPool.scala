@@ -57,7 +57,7 @@ object FOPPool {
       }
 
       override def validate(t: MemcachedConnection): Boolean = {
-        Await.result(client.version().map(_.nonEmpty).run(t).runAsync,
+        Await.result(client.version().map(_.nonEmpty).run(t).runToFuture,
                      connectionPoolConfig.validationTimeout.getOrElse(3 seconds))
       }
     }

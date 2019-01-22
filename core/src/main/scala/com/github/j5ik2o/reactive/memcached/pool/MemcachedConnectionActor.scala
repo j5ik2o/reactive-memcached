@@ -40,7 +40,7 @@ class MemcachedConnectionActor(peerConfig: PeerConfig,
 
   override def receive: Receive = {
     case cmdReq: CommandRequest =>
-      connection.send(cmdReq).runAsync.mapTo[CommandResponse].pipeTo(sender())
+      connection.send(cmdReq).runToFuture.mapTo[CommandResponse].pipeTo(sender())
     case BorrowConnection =>
       log.debug("msg = BorrowConnection")
       sender() ! ConnectionGotten(connection)
