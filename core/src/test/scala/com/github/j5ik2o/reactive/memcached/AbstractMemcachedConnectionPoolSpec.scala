@@ -45,7 +45,7 @@ abstract class AbstractMemcachedConnectionPoolSpec(systemName: String)
         gr1 <- ConnectionAutoClose(pool)(_.send(GetRequest(UUID.randomUUID(), key1)))
         gr2 <- ConnectionAutoClose(pool)(_.send(GetRequest(UUID.randomUUID(), key2)))
         dr  <- ConnectionAutoClose(pool)(_.send(DeleteRequest(UUID.randomUUID(), key1)))
-      } yield (gr1, gr2, dr)).run.runAsync.futureValue
+      } yield (gr1, gr2, dr)).run.runToFuture.futureValue
       result._1.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._2.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._3.isInstanceOf[DeleteSucceeded] shouldBe true

@@ -9,8 +9,8 @@ lazy val scalaStyleSettings = Seq(
 val coreSettings = Seq(
   sonatypeProfileName := "com.github.j5ik2o",
   organization := "com.github.j5ik2o",
-  scalaVersion := "2.11.11",
-  crossScalaVersions ++= Seq("2.11.11", "2.12.7"),
+  scalaVersion := "2.11.12",
+  crossScalaVersions ++= Seq("2.11.12", "2.12.8"),
   scalacOptions ++= {
     Seq(
       "-feature",
@@ -69,9 +69,9 @@ val coreSettings = Seq(
   resolvers += Resolver.sonatypeRepo("releases"),
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7"),
   libraryDependencies ++= Seq(
-    "io.monix"            %% "monix"                        % "3.0.0-RC1",
-    "org.typelevel"       %% "cats-core"                    % "1.1.0",
-    "org.typelevel"       %% "cats-free"                    % "1.1.0",
+    "io.monix"            %% "monix"                        % "3.0.0-RC2",
+    "org.typelevel"       %% "cats-core"                    % "1.5.0",
+    "org.typelevel"       %% "cats-free"                    % "1.5.0",
     "com.beachape"        %% "enumeratum"                   % "1.5.13",
     "org.slf4j"           % "slf4j-api"                     % "1.7.25",
     "danslapman"          %% "cats-conts"                   % "0.4",
@@ -93,7 +93,7 @@ val coreSettings = Seq(
   wartremoverExcluded += baseDirectory.value / "src" / "test" / "scala"
 ) ++ scalaStyleSettings
 
-val akkaVersion = "2.5.11"
+val akkaVersion = "2.5.19"
 
 lazy val test = (project in file("test"))
   .settings(

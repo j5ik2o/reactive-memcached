@@ -23,6 +23,6 @@ class MemcachedConnectionPoolFlow(memcachedConnectionPool: MemcachedConnectionPo
 ) {
   private def toFlow(implicit scheduler: Scheduler): Flow[CommandRequest, CommandResponse, NotUsed] =
     Flow[CommandRequest].mapAsync(parallelism) { cmd =>
-      memcachedConnectionPool.withConnectionM(ReaderT(_.send(cmd))).runAsync
+      memcachedConnectionPool.withConnectionM(ReaderT(_.send(cmd))).runToFuture
     }
 }

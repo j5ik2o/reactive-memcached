@@ -59,7 +59,7 @@ final class ScalaPool private (val connectionPoolConfig: ScalaPoolConfig,
       },
       dispose = { _.shutdown() },
       healthCheck = { con =>
-        Await.result(client.version().map(_.nonEmpty).run(con).runAsync,
+        Await.result(client.version().map(_.nonEmpty).run(con).runToFuture,
                      connectionPoolConfig.validationTimeout.getOrElse(DEFAULT_VALIDATION_TIMEOUT))
       }
     )

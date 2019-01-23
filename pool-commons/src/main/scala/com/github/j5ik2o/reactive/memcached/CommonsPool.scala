@@ -81,7 +81,7 @@ object CommonsPool {
       new DefaultPooledObject(t)
 
     override def validateObject(p: PooledObject[MemcachedConnectionPoolable]): Boolean = {
-      Await.result(client.version().map(_.nonEmpty).run(p.getObject).runAsync, validationTimeout)
+      Await.result(client.version().map(_.nonEmpty).run(p.getObject).runToFuture, validationTimeout)
     }
 
   }

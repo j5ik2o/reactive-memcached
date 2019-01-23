@@ -33,12 +33,12 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val key   = UUID.randomUUID().toString
       val value = UUID.randomUUID().toString
 
-      client.get(key).run(connection).runAsync.futureValue shouldBe None
+      client.get(key).run(connection).runToFuture.futureValue shouldBe None
 
       val result1 = (for {
         _ <- client.set(key, value)
         r <- client.get(key)
-      } yield r).run(connection).runAsync.futureValue
+      } yield r).run(connection).runToFuture.futureValue
 
       result1.map(_.value) shouldBe Some(value)
 
@@ -47,7 +47,7 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
         r1 <- client.get(key)
         _  <- client.set(key, UUID.randomUUID().toString)
         r2 <- client.get(key)
-      } yield (r1, r2)).run(connection).runAsync.futureValue
+      } yield (r1, r2)).run(connection).runToFuture.futureValue
 
       result2._1.map(_.value) should not be result2._2.map(_.value)
 
@@ -58,11 +58,11 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val result1 = (for {
         _  <- client.add(key, value)
         gr <- client.get(key)
-      } yield gr).run(connection).runAsync.futureValue
+      } yield gr).run(connection).runToFuture.futureValue
 
       result1.map(_.value) shouldBe Some(value)
 
-      client.add(key, value).run(connection).runAsync.futureValue shouldBe 0
+      client.add(key, value).run(connection).runToFuture.futureValue shouldBe 0
     }
     "set & gets" in {
       val key   = UUID.randomUUID().toString
@@ -70,7 +70,7 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val result = (for {
         _  <- client.set(key, value)
         gr <- client.gets(key)
-      } yield gr).run(connection).runAsync.futureValue
+      } yield gr).run(connection).runToFuture.futureValue
 
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique) should not be empty
@@ -83,7 +83,7 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
         gr1 <- client.gets(key)
         _   <- client.cas(key, value, gr1.get.casUnique.get)
         gr2 <- client.gets(key)
-      } yield gr2).run(connection).runAsync.futureValue
+      } yield gr2).run(connection).runToFuture.futureValue
 
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique) should not be empty
@@ -95,9 +95,9 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       (for {
         _ <- client.set(key, value, expire)
         _ <- client.touch(key, expire * 5)
-      } yield ()).run(connection).runAsync.futureValue
+      } yield ()).run(connection).runToFuture.futureValue
       Thread.sleep(expire.toMillis)
-      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+      client.get(key).run(connection).runToFuture.futureValue.map(_.value) shouldBe Some(value)
     }
     "gat" in {
       val expire = 3 * timeFactor seconds
@@ -106,9 +106,9 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val result = (for {
         _  <- client.set(key, value, expire)
         gr <- client.gat(key, expire * 5)
-      } yield gr).run(connection).runAsync.futureValue
+      } yield gr).run(connection).runToFuture.futureValue
       Thread.sleep(expire.toMillis)
-      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+      client.get(key).run(connection).runToFuture.futureValue.map(_.value) shouldBe Some(value)
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique).isEmpty shouldBe true
     }
@@ -119,9 +119,9 @@ class MemcachedClientSpec extends AbstractActorSpec(ActorSystem("MemcachedClient
       val result = (for {
         _  <- client.set(key, value, expire)
         gr <- client.gats(key, expire * 5)
-      } yield gr).run(connection).runAsync.futureValue
+      } yield gr).run(connection).runToFuture.futureValue
       Thread.sleep(expire.toMillis)
-      client.get(key).run(connection).runAsync.futureValue.map(_.value) shouldBe Some(value)
+      client.get(key).run(connection).runToFuture.futureValue.map(_.value) shouldBe Some(value)
       result.map(_.value) shouldBe Some(value)
       result.flatMap(_.casUnique).nonEmpty shouldBe true
     }

@@ -39,7 +39,7 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
         gr1 <- connection.send(GetRequest(UUID.randomUUID(), key1))
         gr2 <- connection.send(GetRequest(UUID.randomUUID(), key2))
         dr  <- connection.send(DeleteRequest(UUID.randomUUID(), key1))
-      } yield (gr1, gr2, dr)).runAsync.futureValue
+      } yield (gr1, gr2, dr)).runToFuture.futureValue
       result._1.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._2.asInstanceOf[GetSucceeded].value.get.value shouldBe value
       result._3.isInstanceOf[DeleteSucceeded] shouldBe true
@@ -50,12 +50,12 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
       val value = UUID.randomUUID().toString
       connection
         .send(AddRequest(UUID.randomUUID(), key, value))
-        .runAsync
+        .runToFuture
         .futureValue
         .isInstanceOf[AddSucceeded] shouldBe true
       connection
         .send(AddRequest(UUID.randomUUID(), key, value))
-        .runAsync
+        .runToFuture
         .futureValue
         .isInstanceOf[AddNotStored] shouldBe true
     }
@@ -65,17 +65,17 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
       val value = UUID.randomUUID().toString
       connection
         .send(ReplaceRequest(UUID.randomUUID(), key, value))
-        .runAsync
+        .runToFuture
         .futureValue
         .isInstanceOf[ReplaceNotStored] shouldBe true
       connection
         .send(SetRequest(UUID.randomUUID(), key, value))
-        .runAsync
+        .runToFuture
         .futureValue
         .isInstanceOf[SetSucceeded] shouldBe true
       connection
         .send(ReplaceRequest(UUID.randomUUID(), key, value))
-        .runAsync
+        .runToFuture
         .futureValue
         .isInstanceOf[ReplaceSucceeded] shouldBe true
     }
@@ -88,7 +88,7 @@ class MemcachedConnectionSpec extends AbstractActorSpec(ActorSystem("MemcachedCo
         ir <- connection.send(IncrementRequest(UUID.randomUUID(), key, value))
         gr <- connection.send(GetRequest(UUID.randomUUID(), key))
         dr <- connection.send(DecrementRequest(UUID.randomUUID(), key, value))
-      } yield (ir, gr, dr)).runAsync.futureValue
+      } yield (ir, gr, dr)).runToFuture.futureValue
       result._1.asInstanceOf[IncrementSucceeded].value shouldBe 1
       result._2.asInstanceOf[GetSucceeded].value.get.value.toInt shouldBe value
       result._3.asInstanceOf[DecrementSucceeded].value shouldBe 0
